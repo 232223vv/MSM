@@ -9,6 +9,7 @@ module top(
     input [7:0] da_data_in,
     output [7:0] ad_data_out,
     output da_clk,
+    output ad_clk,
 
     //hdmi signals
     output            rstn_out      ,
