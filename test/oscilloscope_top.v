@@ -1,8 +1,10 @@
-module fft_top(
+module oscilloscope_top(
    input    wire  clk           ,
-   input    wire  en                ,
+   input    wire  oscilloscope_en                ,
+   input    wire  fft_en    ,
    input    wire  rst_n             ,
    input    wire  [7:0]ad_data_in   ,
+   output [7:0] ad_data,
    output fft_clk,
    output [31:0] fft_data,
    output ad_clk
@@ -14,7 +16,7 @@ module fft_top(
   .pll_lock(pll_lock),    // output
   .clkout0(fft_clk)       // output
 );
-
+    assign ad_data =((oscilloscope_en==1)? ad_data_in: 8'b0);
     reg [9:0] cnt;
     reg cnt_flag;
     always @(posedge fft_clk) begin
@@ -22,14 +24,20 @@ module fft_top(
             cnt<=10'b0;
             cnt_flag<=1'b0;
         end
-        else if(cnt<10'd1000)
-            cnt<=cnt+1;
-        else if(cnt==10'd1000) begin
-            cnt_flag<=1'b1;
-            cnt<=cnt+1;
+        else if(fft_en) begin
+            if(cnt<10'd1000)
+                cnt<=cnt+1;
+            else if(cnt==10'd1000) begin
+                cnt_flag<=1'b1;
+                cnt<=cnt+1;
+            end
+            else if(cnt==10'd1001) begin
+                cnt<=cnt;
+                cnt_flag<=1'b0;
+            end
         end
-        else if(cnt==10'd1001) begin
-            cnt<=cnt;
+        else begin
+            cnt<=10'b0;
             cnt_flag<=1'b0;
         end
     end
