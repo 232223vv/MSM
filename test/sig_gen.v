@@ -7,10 +7,10 @@ module sig_gen(
     input [1:0] cnt_phase,
     input confirm,
     output   reg [7:0] data_out,
-    output ad_clk
+    output da_clk
     
 );
-    assign ad_clk = clk;
+    assign da_clk = clk;
 
     reg [1:0] amp;
     always@(posedge clk) begin
