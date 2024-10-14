@@ -1,12 +1,20 @@
 module fft_top(
-   input    wire  fft_clk           ,
+   input    wire  clk           ,
    input    wire  en                ,
    input    wire  rst_n             ,
    input    wire  [7:0]ad_data_in   ,
-   output [7:0] o_axi4s_data_tuser, //输出0-255的序号
+   output fft_clk,
    output [31:0] fft_data,
-   output o_axi4s_data_tvalid //高电平有效
+   output ad_clk
   );
+    wire pll_lock;
+    assign ad_clk=clk;
+    pll pll_inst (
+  .clkin1(clk),        // input
+  .pll_lock(pll_lock),    // output
+  .clkout0(fft_clk)       // output
+);
+
     reg [9:0] cnt;
     reg cnt_flag;
     always @(posedge fft_clk) begin
