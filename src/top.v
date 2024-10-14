@@ -6,8 +6,8 @@ module top(
     input [7:0] key_in,
 
     // ad_damodule
-    input [7:0] da_data_in,
-    output [7:0] ad_data_out,
+    input [7:0] ad_data_in,
+    output [7:0] da_data_out,
     output da_clk,
     output ad_clk,
 
@@ -414,7 +414,7 @@ module top(
         .cnt_phase(cnt_phaseORduty),
         .confirm(confirm_done),
 
-        .data_out(ad_data_out),
+        .data_out(da_data_out),
         .da_clk(da_clk)
     );
 
