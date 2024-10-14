@@ -6,7 +6,7 @@ module sig_gen(
     input [1:0] cnt_fre,
     input [1:0] cnt_phase,
     input confirm,
-    output   reg [7:0] data_out,
+    output [7:0] data_out,
     output da_clk
     
 );
@@ -107,7 +107,7 @@ module sig_gen(
     reg [8:0] duty;
     always @(posedge clk) begin
         if(!rst_n) begin
-            duty <= numOFsample * 30 / 100;
+            duty <= numOFsample * 5'd30 / 7'd100;
         end
         else begin
             case(cnt_phase)
@@ -141,13 +141,13 @@ module sig_gen(
     end
 
     wire [11:0] addr;
-    assign addr = (addr_temp < 2000) ? addr_temp : addr_temp - 12'd2000;
+    assign addr = (addr_temp < 12'd2000) ? addr_temp : addr_temp - 12'd2000;
     wire [7:0] sin_data;
     sin_gen u_sin_gen(
         .addr(addr[10:0]),          // input [9:0]
         .clk(clk),            // input
         .rst(!confirm),            // input
-        .rd_data(sin_wave)     // output [7:0]
+        .rd_data(sin_data)     // output [7:0]
     );
 
     reg[8:0] s3_data_cnt;
@@ -155,7 +155,7 @@ module sig_gen(
         if(!rst_n) begin
             s3_data_cnt <= 9'd0;
         end
-        else if(((cnt_sig == 2'd1) | cnt_sig == 2'd3) & confirm) begin
+        else if(((cnt_sig == 2'd1) | (cnt_sig == 2'd3) | (cnt_sig == 2'd0)) && confirm) begin
             if(s3_data_cnt == numOFsample - 1) begin
                 s3_data_cnt <= 9'd0;
             end
@@ -178,7 +178,7 @@ module sig_gen(
                 squ_data <= 8'd0;
             end
             else begin
-                squ_data <= (8'd255 >> amp);
+                squ_data <= 8'd255 >> amp;
             end
         end
         else begin
@@ -218,16 +218,11 @@ module sig_gen(
         if(!rst_n) begin
             tri_data <= 8'd0;
         end
-        else if((cnt_sig == 2'd2) & confirm) begin
-            // if(tri_data_cnt <= ((numOFsample / 2) - 1)) begin
+        else if((cnt_sig == 2'd2) && confirm) begin
             tri_data <= tri_data_cnt * (8'd255 >> amp) / (numOFsample / 2);
-            // end
-            // else begin // if(data_cnt == (numOFsample / 2)) 
-            //     tri_data <= 8'd255 >> amp;
-            // end
         end
         else begin
-            tri_data <= 8'd0;
+            tri_data <= data_out;
         end
     end
 
@@ -240,25 +235,13 @@ module sig_gen(
             saw_data <= s3_data_cnt * (8'd255 >> amp) / (numOFsample - 1);
         end
         else begin
-            saw_data <= 8'd0;
+            saw_data <= data_out;
         end
     end
 
-    always @(posedge clk) begin
-        case(cnt_sig)
-        2'd0: begin
-            data_out <= (sin_data >> amp);
-        end
-        2'd1: begin
-            data_out <= squ_data;
-        end
-        2'd2: begin
-            data_out <= tri_data;
-        end
-        2'd3: begin
-            data_out <= saw_data;
-        end
-        endcase
-    end
+    assign data_out = {8{cnt_sig == 2'd0}} & (sin_data >> amp)
+                    | {8{cnt_sig == 2'd1}} & squ_data
+                    | {8{cnt_sig == 2'd2}} & tri_data
+                    | {8{cnt_sig == 2'd3}} & saw_data;
 
 endmodule

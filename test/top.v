@@ -8,22 +8,22 @@ module top(
     
     input [7:0] key_in,
 
-    output [7:0] ad_data_out,
-    output da_clk,
+    output [7:0] da_data_out,
+    output da_clk
 
-    //hdmi signals
-    output            rstn_out      ,
-    output            iic_tx_scl    ,
-    inout             iic_tx_sda    ,
-    output            led_int       ,
+    // //hdmi signals
+    // output            rstn_out      ,
+    // output            iic_tx_scl    ,
+    // inout             iic_tx_sda    ,
+    // output            led_int       ,
 
-    output            vout_clk      ,                         
-    output            vs_out        , 
-    output            hs_out        , 
-    output            de_out        ,
-    output      [7:0]  r_out        , 
-    output      [7:0]  g_out        , 
-    output      [7:0]  b_out   
+    // output            vout_clk      ,                         
+    // output            vs_out        , 
+    // output            hs_out        , 
+    // output            de_out        ,
+    // output      [7:0]  r_out        , 
+    // output      [7:0]  g_out        , 
+    // output      [7:0]  b_out   
 
     );
 
@@ -395,40 +395,41 @@ module top(
         .cnt_phase(cnt_phaseORduty),
         .confirm(confirm_done),
 
-        .data_out(ad_data_out)
+        .data_out(da_data_out),
+        .da_clk(da_clk)
     );
 
 
-    wire        pix_clk;
-    wire [23:0] sig_gen_rgb_out;
-    wire        sig_gen_vs_out;
-    wire        sig_gen_hs_out;
-    wire        sig_gen_de_out;
+    // wire        pix_clk;
+    // wire [23:0] sig_gen_rgb_out;
+    // wire        sig_gen_vs_out;
+    // wire        sig_gen_hs_out;
+    // wire        sig_gen_de_out;
     
-    hdmi_dis u_sig_hdmi(
-    .sys_clk(clk_50M),
-    .cnt_level1(cntlevel1),
-    .level(level),
-    .sig_gen_cnt({cntlevel2_sig, cnt_wave, cnt_amp, cnt_fre, cnt_phaseORduty}),
-    .rst_n(rst_n),
+    // hdmi_dis u_sig_hdmi(
+    // .sys_clk(clk_50M),
+    // .cnt_level1(cntlevel1),
+    // .level(level),
+    // .sig_gen_cnt({cntlevel2_sig, cnt_wave, cnt_amp, cnt_fre, cnt_phaseORduty}),
+    // .rst_n(rst_n),
 
-    .rstn_out(rstn_out),
-    .iic_tx_scl( iic_tx_scl),
-    .iic_tx_sda(iic_tx_sda),
-    .led_int(led_int),
+    // .rstn_out(rstn_out),
+    // .iic_tx_scl( iic_tx_scl),
+    // .iic_tx_sda(iic_tx_sda),
+    // .led_int(led_int),
 
-    .pix_clk(pix_clk),
-    .vs_out(sig_gen_vs_out),
-    .hs_out(sig_gen_hs_out),
-    .de_out(sig_gen_de_out),
-    .r_out(sig_gen_rgb_out[23:16]),
-    .g_out(sig_gen_rgb_out[15:8]),
-    .b_out(sig_gen_rgb_out[7:0])   
-    );
+    // .pix_clk(pix_clk),
+    // .vs_out(sig_gen_vs_out),
+    // .hs_out(sig_gen_hs_out),
+    // .de_out(sig_gen_de_out),
+    // .r_out(sig_gen_rgb_out[23:16]),
+    // .g_out(sig_gen_rgb_out[15:8]),
+    // .b_out(sig_gen_rgb_out[7:0])   
+    // );
 
-    assign vout_clk=pix_clk;
-    assign vs_out=sig_gen_vs_out;
-    assign hs_out=sig_gen_hs_out;
-    assign de_out=sig_gen_de_out;
-    assign {r_out,g_out,b_out}=sig_gen_rgb_out;
+    // assign vout_clk=pix_clk;
+    // assign vs_out=sig_gen_vs_out;
+    // assign hs_out=sig_gen_hs_out;
+    // assign de_out=sig_gen_de_out;
+    // assign {r_out,g_out,b_out}=sig_gen_rgb_out;
 endmodule
