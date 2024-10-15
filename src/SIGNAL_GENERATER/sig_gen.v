@@ -6,205 +6,242 @@ module sig_gen(
     input [1:0] cnt_fre,
     input [1:0] cnt_phase,
     input confirm,
-    output   reg [7:0] data_out,
+    output [7:0] data_out,
     output da_clk
     
-    );
-//    reg [7:0] data_out;
-    
-     //    分别改变频率控制字、相位控制字
+);
     assign da_clk = clk;
-     reg [3:0] fword; 
-     reg [8:0] xword;
-     always @(posedge clk) begin
-        if(!rst_n)
-            fword<=4'b1111;
-        else if(confirm) begin
-            case(cnt_fre)
-              2'b11:fword<=4'b0001;
-              2'b10:fword<=4'b0010;
-              2'b01:fword<=4'b0011;
-              2'b00:fword<=4'b0101;
-              default:fword<=4'b0101;
-            endcase 
+
+    reg [1:0] amp;
+    always@(posedge clk) begin
+        if(!rst_n) begin
+            amp <= 3'd1;
         end
-     end 
-      always @(posedge clk) begin
-        if(!rst_n)
-           xword<=9'd192;
-        else if (confirm) begin
-            case(cnt_phase)
-                2'd2:xword<=9'd64;
-                2'd1:xword<=9'd0;
-                2'd0:xword<=9'd192;
-                2'd3:xword<=9'd128;
-                default:xword<=9'd192;
+        else begin
+            case(cnt_amp)
+            2'd0: begin
+                amp <= 2'd0;
+            end
+            2'd1: begin
+                amp <= 2'd1;
+            end
+            2'd2: begin
+                amp <= 2'd2;
+            end
+            2'd3: begin
+                amp <= 2'd3;
+            end
             endcase
         end
     end
-    reg [10:0] addr;
-      always@(posedge clk ) begin
-        if(!rst_n)
-            addr<=xword;
-        else if(confirm) begin
-            addr<=addr+fword;
-        end
-        else
-            addr<=addr;
-    end 
- //    用ram存储深度为256，宽度为8位的正弦信号
- wire [7:0] sin_wave;
-      
-      cos_gen u_cos_gen (
-  .addr(addr),          // input [9:0]
-  .clk(clk),            // input
-  .rst(!confirm),            // input
-  .rd_data(sin_wave)     // output [7:0]
-);
-                              reg [10:0] counter;      
-    reg [10:0] period;        
-    reg [7:0] high_time;     
-    reg [31:0] tri_counter;      
-    reg [31:0] tri_period;
-    reg [31:0] tri_step_size;       
-    reg direction;            
-     reg [7:0] amplitude;
-     reg [7:0] counter_saw;       
-     reg [7:0] period_saw;        
-     reg [7:0] amplitude_saw;  
-     reg cnt_flag;
-     reg cnt_flag_1;   
+    
+    reg [5:0] fre_word;
     always @(posedge clk) begin
         if(!rst_n) begin
-            data_out<=8'b0;
-            period <= 9'd0;
-             high_time <= 8'd0;
-              
-             counter <= 11'd0;
-             tri_step_size<=32'd0;
-             tri_counter<=32'd0;
-             tri_period<=32'd0;
-             direction <= 1'b1;
-             amplitude<=8'd0;
-             counter_saw<=8'd0;       
-             period_saw<=8'd0;        
-             amplitude_saw<=8'd0;  
+            fre_word <= 6'd40;
         end
-        else if(!confirm) begin
-            data_out<=8'b0;
-        end 
         else begin
-            case(cnt_sig)
-                2'b00:data_out<=sin_wave<<cnt_amp;
-                2'b01:begin
-                        case (cnt_fre)
-                            2'b11: period <= 11'd399;   
-                            2'b01: period <= 9'd99;   
-                            2'b10: period <= 9'd199 ;
-                            2'b00: period <= 9'd49;   
-                            default: period <= 9'd49; 
-                            
-                        endcase
-                    
-                    case (cnt_phase)
-                        2'b00: high_time <= (period * 30) / 100;  // 30% 占空比
-                        2'b01: high_time <= (period * 50) / 100;  // 50% 占空比
-                        2'b10: high_time <= (period * 70) / 100;  // 70% 占空比
-                        2'b11: high_time <= (period * 90) / 100; // 90% 占空比
-                        default: high_time <= (period * 50) / 100; // 默认50%占空比
-                    endcase
-                    if(confirm) begin
-                        if (counter < period) begin
-                            counter <= counter + 1;
-                            if (counter < high_time)
-                                data_out <= 8'd255;  
-                            else
-                                data_out <=8 'b0;  
-                            end 
-                            else begin
-                            counter <= 8'd0;
-                            end
-                        end
-                    end
-                    2'b10:begin
-                        case (cnt_fre)
-                            2'b11:begin
-                                tri_period <= 32'd3;
-                                tri_step_size<=32'd255/25;
-                            end   
-                            2'b01:begin
-                                tri_period <= 32'd1; 
-                                tri_step_size<=32'd255/25;
-                            end  
-                            2'b10:begin
-                                tri_period <= 32'd2 ;
-                                tri_step_size<=32'd255/25; 
-                            end 
-                            2'b00:begin
-                                tri_period <= 32'd0;
-                                tri_step_size<=32'd255/25;
-                            end    
-                            default: begin
-                                tri_period <= 32'd100;
-                                tri_step_size<=32'd255/25;
-                            end 
-                      
-                        endcase
-                        if(confirm) begin
-                                 if (tri_counter >= tri_period) begin
-                                        tri_counter <= 32'd0;  // 重置计数器
-                                        if (direction) begin
-                                            if (amplitude + tri_step_size >= 8'd255) begin
-                                                amplitude <= 8'd255;  // 达到顶点后切换方向
-                                                direction <= 1'b0;
-                                            end 
-                                            else begin
-                                                amplitude <= amplitude + tri_step_size;  // 幅值递增
-                                            end
-                                        end 
-                                        else begin
-                                            if (amplitude <= tri_step_size) begin
-                                                amplitude <= 8'd0;  // 达到最低点后切换方向
-                                                direction <= 1'b1;
-                                            end else begin
-                                                amplitude <= amplitude - tri_step_size;  // 幅值递减
-                                            end
-                                        end
-                                    end 
-                                    else begin
-                                        tri_counter <= tri_counter + 1;  // 计数器递增
-                                    end
-                                end
-   
-                            data_out <= amplitude;
-                        end
-                   
-                    2'b11:begin
-                        case(cnt_fre)
-                            2'b11:period_saw <= 8'd4;   
-                            2'b01:period_saw <= 8'd1;   
-                            2'b10:period_saw <= 8'd2 ;
-                            2'b00:period_saw <= 8'd0;   
-                            default: period_saw <= 8'd0;
-                        endcase
-                        
-                        if(confirm) begin
-                               if (counter_saw >= period_saw) begin
-                                        counter_saw <= 8'd0;  // 重置计数器
-                                        if (amplitude_saw < 8'd255)
-                                            amplitude_saw <= amplitude_saw + 8'd255/50;  // 幅值递增
-                                        else
-                                            amplitude_saw <= 8'd0;  // 达到255后重置为0
-                                    end 
-                                else begin
-                                    counter_saw <= counter_saw + 1;  // 计数器递增
-                                end
-                                
-                               data_out <= amplitude_saw;  
-                             end  
-                        end
-                   
+            case(cnt_fre)
+            2'd0: begin
+                fre_word <= 6'd40;
+            end
+            2'd1: begin
+                fre_word <= 6'd20;
+            end
+            2'd2: begin
+                fre_word <= 6'd10;
+            end
+            2'd3: begin
+                fre_word <= 6'd5;
+            end
             endcase
         end
     end
+
+    reg [8:0] numOFsample;
+    always @(posedge clk) begin
+        if(!rst_n) begin
+            numOFsample <= 9'd50;
+        end
+        else begin
+            case(cnt_fre)
+            2'd0: begin
+                numOFsample <= 9'd50;
+            end
+            2'd1: begin
+                numOFsample <= 9'd100;
+            end
+            2'd2: begin
+                numOFsample <= 9'd200;
+            end
+            2'd3: begin
+                numOFsample <= 9'd400;
+            end
+            endcase
+        end
+    end
+
+    reg [10:0] pha_word;
+    always @(posedge clk) begin
+        if(!rst_n) begin
+            pha_word <= 11'd0;
+        end
+        else begin
+            case(cnt_phase)
+            2'd0: begin
+                pha_word <= 11'd0;
+            end
+            2'd1: begin
+                pha_word  <= 11'd500;   
+            end
+            2'd2: begin
+                pha_word <= 11'd1000;
+            end
+            2'd3: begin
+                pha_word <= 11'd1500;
+            end
+            endcase
+        end
+    end
+
+    reg [8:0] duty;
+    always @(posedge clk) begin
+        if(!rst_n) begin
+            duty <= numOFsample * 5'd30 / 7'd100;
+        end
+        else begin
+            case(cnt_phase)
+            2'd0: begin
+                duty <= numOFsample * 30 / 100;
+            end
+            2'd1: begin
+                duty <= numOFsample * 50 / 100;
+            end
+            2'd2: begin
+                duty <= numOFsample * 70 / 100;
+            end
+            2'd3: begin
+                duty <= numOFsample * 90 / 100;
+            end
+            endcase
+        end
+    end
+ 
+    reg [11:0] addr_temp;
+    always @(posedge clk) begin
+        if(!rst_n) begin
+            addr_temp <= 12'd0;
+        end
+        else if((cnt_sig == 2'd0) && confirm) begin
+            addr_temp <= pha_word + s3_data_cnt * fre_word;
+        end
+        else begin
+            addr_temp <= 12'd0;
+        end
+    end
+
+    wire [11:0] addr;
+    assign addr = (addr_temp < 12'd2000) ? addr_temp : addr_temp - 12'd2000;
+    wire [7:0] sin_data;
+    sin_gen u_sin_gen(
+        .addr(addr[10:0]),          // input [9:0]
+        .clk(clk),            // input
+        .rst(!confirm),            // input
+        .rd_data(sin_data)     // output [7:0]
+    );
+
+    reg[8:0] s3_data_cnt;
+    always @(posedge clk) begin
+        if(!rst_n) begin
+            s3_data_cnt <= 9'd0;
+        end
+        else if(((cnt_sig == 2'd1) | (cnt_sig == 2'd3) | (cnt_sig == 2'd0)) && confirm) begin
+            if(s3_data_cnt == numOFsample - 1) begin
+                s3_data_cnt <= 9'd0;
+            end
+            else begin
+                s3_data_cnt <= s3_data_cnt + 1'd1;
+            end
+        end
+        else begin
+            s3_data_cnt <= 9'd0;
+        end
+    end
+
+    reg [7:0] squ_data;
+    always @(posedge clk) begin
+        if(!rst_n) begin
+            squ_data <= 8'd0;
+        end
+        else if((cnt_sig == 2'd1) & confirm) begin
+            if(s3_data_cnt <= duty - 1) begin
+                squ_data <= 8'd0;
+            end
+            else begin
+                squ_data <= 8'd255 >> amp;
+            end
+        end
+        else begin
+            squ_data <= 8'd0;
+        end
+    end
+
+    reg [8:0] tri_data_cnt;
+    reg seq_flag;
+    always @(posedge clk) begin
+        if(!rst_n) begin
+            tri_data_cnt <= 9'd0;
+            seq_flag <= 1'b0;
+        end
+        else if((cnt_sig == 2'd2) && confirm) begin
+            if((tri_data_cnt == 9'd1) && seq_flag) begin
+                tri_data_cnt <= tri_data_cnt - 1'd1;
+                seq_flag <= 1'b0;
+            end
+            else if((tri_data_cnt == (numOFsample / 2)) && !seq_flag) begin
+                tri_data_cnt <= tri_data_cnt - 1'd1;
+                seq_flag <= 1'b1;
+            end
+            else begin
+                tri_data_cnt <= seq_flag ? tri_data_cnt - 1'd1 : tri_data_cnt + 1'd1;
+                seq_flag <= seq_flag;
+            end
+        end
+        else begin
+            tri_data_cnt <= 9'd0;
+            seq_flag <= 1'b0;
+        end
+    end
+
+    reg [7:0] tri_data;
+    always @(posedge clk) begin
+        if(!rst_n) begin
+            tri_data <= 8'd0;
+        end
+        else if((cnt_sig == 2'd2) && confirm) begin
+            tri_data <= tri_data_cnt * (8'd255 >> amp) / (numOFsample / 2);
+        end
+        else begin
+            tri_data <= 8'd0;
+        end
+    end
+
+    reg [7:0] saw_data;
+    always @(posedge clk) begin
+        if(!rst_n) begin
+            saw_data <= 8'd0;
+        end
+        else if((cnt_sig == 2'd3) && confirm) begin
+            saw_data <= s3_data_cnt * (8'd255 >> amp) / (numOFsample - 1);
+        end
+        else begin
+            saw_data <= 8'd0;
+        end
+    end
+
+    assign data_out = {8{cnt_sig == 2'd0}} & (sin_data >> amp)
+                    | {8{cnt_sig == 2'd1}} & squ_data
+                    | {8{cnt_sig == 2'd2}} & tri_data
+                    | {8{cnt_sig == 2'd3}} & saw_data;
+
 endmodule

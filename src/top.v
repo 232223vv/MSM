@@ -5,7 +5,7 @@ module top(
     
     input [7:0] key_in,
 
-    // ad_damodule
+    // ad_da module
     input [7:0] ad_data_in,
     output [7:0] da_data_out,
     output da_clk,
@@ -384,7 +384,7 @@ module top(
         end
     end
 
-         // OSI
+    // OSC
     reg fft_confirm;
     always @(posedge clk_50M) begin
         if(!rst_n) begin
@@ -418,37 +418,38 @@ module top(
         .da_clk(da_clk)
     );
 
+    // oscilloscope_top u_oscilloscope(
+    //     .clk(clk_50M),
+    //     .oscilloscope_en(),
+    //     .fft_en(fft_confirm),
+    //     .rst_n(rst_n),
+    //     .ad_data_in(ad_data_in),
+    //     .ad_data(),
+    //     .fft_clk(),
+    //     .fft_data(),
+    //     .ad_clk(ad_clk)
+    // );
 
-    wire        pix_clk;
-    wire        sig_gen_vs_out;
-    wire        sig_gen_hs_out;
-    wire        sig_gen_de_out;
-    wire [23:0] sig_gen_rgb_out;
     
-    hdmi_dis u_sig_hdmi(
+    hdmi_dis_top u_hdmi(
     .sys_clk(clk_50M),
     .cnt_level1(cntlevel1),
     .level(level),
     .sig_gen_cnt({cntlevel2_sig, cnt_wave, cnt_amp, cnt_fre, cnt_phaseORduty}),
+    .fft_confirm(fft_confirm),
     .rst_n(rst_n),
-
+    
     .rstn_out(rstn_out),
     .iic_tx_scl( iic_tx_scl),
     .iic_tx_sda(iic_tx_sda),
     .led_int(led_int),
 
-    .pix_clk(pix_clk),
-    .vs_out(sig_gen_vs_out),
-    .hs_out(sig_gen_hs_out),
-    .de_out(sig_gen_de_out),
-    .r_out(sig_gen_rgb_out[23:16]),
-    .g_out(sig_gen_rgb_out[15:8]),
-    .b_out(sig_gen_rgb_out[7:0])   
+    .vout_clk(vout_clk),
+    .vs_out(vs_out),
+    .hs_out(hs_out),
+    .de_out(de_out),
+    .r_out(r_out),
+    .g_out(g_out),
+    .b_out(b_out)   
     );
-    
-    assign vout_clk=pix_clk;
-    assign vs_out=sig_gen_vs_out;
-    assign hs_out=sig_gen_hs_out;
-    assign de_out=sig_gen_de_out;
-    assign {r_out,g_out,b_out}=sig_gen_rgb_out; 
 endmodule
