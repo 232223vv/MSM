@@ -222,7 +222,7 @@ module sig_gen(
             tri_data <= tri_data_cnt * (8'd255 >> amp) / (numOFsample / 2);
         end
         else begin
-            tri_data <= data_out;
+            tri_data <= 8'd0;
         end
     end
 
@@ -235,7 +235,7 @@ module sig_gen(
             saw_data <= s3_data_cnt * (8'd255 >> amp) / (numOFsample - 1);
         end
         else begin
-            saw_data <= data_out;
+            saw_data <= 8'd0;
         end
     end
 
