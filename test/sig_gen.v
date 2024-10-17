@@ -200,19 +200,22 @@ module sig_gen(
         end
     end
 
+    wire [10:0] s2_addr;
+    assign s2_addr = s2_addr_temp;
+
     wire [7:0] tri_data;
     tri_gen u_tri_gen(
-        .addr(s2_addr_temp),
+        .addr(s2_addr),
         .clk(clk),
-        .rst(confirm),
+        .rst(!confirm),
         .rd_data(tri_data)
     );
 
     wire [7:0] saw_data;
     saw_gen u_saw_gen(
-        .addr(s2_addr_temp),
+        .addr(s2_addr),
         .clk(clk),
-        .rst(confirm),
+        .rst(!confirm),
         .rd_data(saw_data)
     );
 
