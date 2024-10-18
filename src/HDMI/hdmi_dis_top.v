@@ -147,8 +147,5 @@ wav_display_fft wav_display_fft(
     assign hs_out = {level,cnt_level1} == 3'b101 ? osc_hs_out : sig_gen_hs_out;
     assign de_out = {level,cnt_level1} == 3'b101 ? osc_de_out : sig_gen_de_out;
     assign {r_out, g_out, b_out} = {level,cnt_level1} == 3'b101 ? osc_rgb_out : sig_gen_rgb_out;
-
-    
-        
      
 endmodule
