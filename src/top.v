@@ -403,6 +403,59 @@ module top(
         end
     end
 
+    reg [1:0] vertical_zoom, horizontal_zoom;
+    always @(posedge clk_50M) begin
+        if(!rst_n) begin
+            vertical_zoom <= 2'd0;
+            horizontal_zoom <= 2'd0;
+        end
+        else if((cstate == OSI) && fft_confirm) begin
+            if(up) begin
+                if(vertical_zoom == 2'd2) begin
+                    vertical_zoom <= 2'd0;
+                end
+                else begin
+                    vertical_zoom <= vertical_zoom + 1'd1;
+                end
+            end
+            else if(down) begin
+                if(vertical_zoom == 2'd0) begin
+                    vertical_zoom <= 2'd2;
+                end
+                else begin
+                    vertical_zoom <= vertical_zoom - 1'd1;
+                end         
+            end
+            else begin
+                vertical_zoom <= vertical_zoom;
+            end
+                
+            if(left) begin
+                if(horizontal_zoom == 2'd0) begin
+                    horizontal_zoom <= 2'd2;
+                end
+                else begin
+                    horizontal_zoom <= horizontal_zoom - 1'd1;
+                end
+            end
+            else if(right) begin
+                if(horizontal_zoom == 2'd2) begin
+                    horizontal_zoom <= 2'd0;
+                end
+                else begin
+                    horizontal_zoom <= horizontal_zoom + 1'd1;
+                end    
+            end
+            else begin
+                horizontal_zoom <= horizontal_zoom;
+            end
+        end
+        else begin
+            vertical_zoom <= 2'd0;
+            horizontal_zoom <= 2'd0;
+        end
+    end
+
 
     sig_gen u_sig_gen(
         .clk(clk_50M),
@@ -418,19 +471,6 @@ module top(
         .da_clk(da_clk)
     );
 
-    // oscilloscope_top u_oscilloscope(
-    //     .clk(clk_50M),
-    //     .oscilloscope_en(),
-    //     .fft_en(fft_confirm),
-    //     .rst_n(rst_n),
-    //     .ad_data_in(ad_data_in),
-    //     .ad_data(),
-    //     .fft_clk(),
-    //     .fft_data(),
-    //     .ad_clk(ad_clk)
-    // );
-
-    
     hdmi_dis_top u_hdmi(
     .sys_clk(clk_50M),
     .cnt_level1(cntlevel1),
