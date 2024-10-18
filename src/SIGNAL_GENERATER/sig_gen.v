@@ -126,36 +126,13 @@ module sig_gen(
             endcase
         end
     end
- 
-    reg [11:0] addr_temp;
-    always @(posedge clk) begin
-        if(!rst_n) begin
-            addr_temp <= 12'd0;
-        end
-        else if((cnt_sig == 2'd0) && confirm) begin
-            addr_temp <= pha_word + s3_data_cnt * fre_word;
-        end
-        else begin
-            addr_temp <= 12'd0;
-        end
-    end
-
-    wire [11:0] addr;
-    assign addr = (addr_temp < 12'd2000) ? addr_temp : addr_temp - 12'd2000;
-    wire [7:0] sin_data;
-    sin_gen u_sin_gen(
-        .addr(addr[10:0]),          // input [9:0]
-        .clk(clk),            // input
-        .rst(!confirm),            // input
-        .rd_data(sin_data)     // output [7:0]
-    );
 
     reg[8:0] s3_data_cnt;
     always @(posedge clk) begin
         if(!rst_n) begin
             s3_data_cnt <= 9'd0;
         end
-        else if(((cnt_sig == 2'd1) | (cnt_sig == 2'd3) | (cnt_sig == 2'd0)) && confirm) begin
+        else if(confirm) begin
             if(s3_data_cnt == numOFsample - 1) begin
                 s3_data_cnt <= 9'd0;
             end
@@ -186,62 +163,119 @@ module sig_gen(
         end
     end
 
-    reg [8:0] tri_data_cnt;
-    reg seq_flag;
+    reg [11:0] sin_addr_temp;
     always @(posedge clk) begin
         if(!rst_n) begin
-            tri_data_cnt <= 9'd0;
-            seq_flag <= 1'b0;
+            sin_addr_temp <= 12'd0;
         end
-        else if((cnt_sig == 2'd2) && confirm) begin
-            if((tri_data_cnt == 9'd1) && seq_flag) begin
-                tri_data_cnt <= tri_data_cnt - 1'd1;
-                seq_flag <= 1'b0;
-            end
-            else if((tri_data_cnt == (numOFsample / 2)) && !seq_flag) begin
-                tri_data_cnt <= tri_data_cnt - 1'd1;
-                seq_flag <= 1'b1;
-            end
-            else begin
-                tri_data_cnt <= seq_flag ? tri_data_cnt - 1'd1 : tri_data_cnt + 1'd1;
-                seq_flag <= seq_flag;
-            end
+        else if((cnt_sig == 2'd0) && confirm) begin
+            sin_addr_temp <= pha_word + s3_data_cnt * fre_word;
         end
         else begin
-            tri_data_cnt <= 9'd0;
-            seq_flag <= 1'b0;
+            sin_addr_temp <= 12'd0;
         end
     end
 
-    reg [7:0] tri_data;
+    wire [11:0] sin_addr;
+    assign sin_addr = (sin_addr_temp < 12'd2000) ? sin_addr_temp : sin_addr_temp - 12'd2000;
+
+    wire [7:0] sin_data;
+    sin_gen u_sin_gen(
+        .addr(sin_addr[10:0]),          // input [9:0]
+        .clk(clk),            // input
+        .rst(!confirm),            // input
+        .rd_data(sin_data)     // output [7:0]
+    );
+
+    reg [10:0] s2_addr_temp;
     always @(posedge clk) begin
         if(!rst_n) begin
-            tri_data <= 8'd0;
+            s2_addr_temp <= 11'd0;
         end
-        else if((cnt_sig == 2'd2) && confirm) begin
-            tri_data <= tri_data_cnt * (8'd255 >> amp) / (numOFsample / 2);
+        else if(((cnt_sig == 2'd2) | (cnt_sig == 2'd3)) && confirm) begin
+            s2_addr_temp <= s3_data_cnt * fre_word;
         end
         else begin
-            tri_data <= 8'd0;
+            s2_addr_temp <= 11'd0;
         end
     end
 
-    reg [7:0] saw_data;
-    always @(posedge clk) begin
-        if(!rst_n) begin
-            saw_data <= 8'd0;
-        end
-        else if((cnt_sig == 2'd3) && confirm) begin
-            saw_data <= s3_data_cnt * (8'd255 >> amp) / (numOFsample - 1);
-        end
-        else begin
-            saw_data <= 8'd0;
-        end
-    end
+    wire [10:0] s2_addr;
+    assign s2_addr = s2_addr_temp;
+
+    wire [7:0] tri_data;
+    tri_gen u_tri_gen(
+        .addr(s2_addr),
+        .clk(clk),
+        .rst(!confirm),
+        .rd_data(tri_data)
+    );
+
+    wire [7:0] saw_data;
+    saw_gen u_saw_gen(
+        .addr(s2_addr),
+        .clk(clk),
+        .rst(!confirm),
+        .rd_data(saw_data)
+    );
+
+
+    // reg [8:0] tri_data_cnt;
+    // reg seq_flag;
+    // always @(posedge clk) begin
+    //     if(!rst_n) begin
+    //         tri_data_cnt <= 9'd0;
+    //         seq_flag <= 1'b0;
+    //     end
+    //     else if((cnt_sig == 2'd2) && confirm) begin
+    //         if((tri_data_cnt == 9'd1) && seq_flag) begin
+    //             tri_data_cnt <= tri_data_cnt - 1'd1;
+    //             seq_flag <= 1'b0;
+    //         end
+    //         else if((tri_data_cnt == (numOFsample / 2)) && !seq_flag) begin
+    //             tri_data_cnt <= tri_data_cnt - 1'd1;
+    //             seq_flag <= 1'b1;
+    //         end
+    //         else begin
+    //             tri_data_cnt <= seq_flag ? tri_data_cnt - 1'd1 : tri_data_cnt + 1'd1;
+    //             seq_flag <= seq_flag;
+    //         end
+    //     end
+    //     else begin
+    //         tri_data_cnt <= 9'd0;
+    //         seq_flag <= 1'b0;
+    //     end
+    // end
+
+    // reg [7:0] tri_data;
+    // always @(posedge clk) begin
+    //     if(!rst_n) begin
+    //         tri_data <= 8'd0;
+    //     end
+    //     else if((cnt_sig == 2'd2) && confirm) begin
+    //         tri_data <= tri_data_cnt * (8'd255 >> amp) / (numOFsample / 2);
+    //     end
+    //     else begin
+    //         tri_data <= 8'd0;
+    //     end
+    // end
+
+    // reg [7:0] saw_data;
+    // always @(posedge clk) begin
+    //     if(!rst_n) begin
+    //         saw_data <= 8'd0;
+    //     end
+    //     else if((cnt_sig == 2'd3) && confirm) begin
+    //         saw_data <= s3_data_cnt * (8'd255 >> amp) / (numOFsample - 1);
+    //     end
+    //     else begin
+    //         saw_data <= 8'd0;
+    //     end
+    // end
 
     assign data_out = {8{cnt_sig == 2'd0}} & (sin_data >> amp)
                     | {8{cnt_sig == 2'd1}} & squ_data
-                    | {8{cnt_sig == 2'd2}} & tri_data
-                    | {8{cnt_sig == 2'd3}} & saw_data;
+                    | {8{cnt_sig == 2'd2}} & (tri_data >> amp)
+                    | {8{cnt_sig == 2'd3}} & (saw_data >> amp);
 
 endmodule
