@@ -5,7 +5,7 @@ module top(
     
     input [7:0] key_in,
 
-    // ad_da module
+     // ad_da module
     input [7:0] ad_data_in,
     output [7:0] da_data_out,
     output da_clk,
@@ -384,7 +384,7 @@ module top(
         end
     end
 
-    // OSC
+         // OSI
     reg fft_confirm;
     always @(posedge clk_50M) begin
         if(!rst_n) begin
@@ -467,18 +467,49 @@ module top(
         .cnt_phase(cnt_phaseORduty),
         .confirm(confirm_done),
 
-        .data_out(da_data_out),
-        .da_clk(da_clk)
+        .data_out(ad_data_out)
     );
 
-    hdmi_dis_top u_hdmi(
+     wire fft_clk;
+     wire [31:0] fft_data;
+     wire fft_data_valid;
+     oscilloscope_top u_oscilloscope(
+         .clk(clk_50M),
+         .oscilloscope_en((cnt_level1==2'b01 && level==1'b1)),
+         .fft_en(fft_confirm),
+         .rst_n(rst_n),
+         .ad_data_in(ad_data_in),
+         .fft_data_valid(fft_data_valid),
+         //.ad_data(),
+         .fft_clk(fft_clk),
+         .fft_data(fft_data),
+         .ad_clk(ad_clk)
+     );
+    
+        
+
+    //hdmi display module
+    hdmi_dis_top hdmi_display(
+    //input
     .sys_clk(clk_50M),
+    .rst_n(rst_n),
+
     .cnt_level1(cntlevel1),
     .level(level),
+
     .sig_gen_cnt({cntlevel2_sig, cnt_wave, cnt_amp, cnt_fre, cnt_phaseORduty}),
+
     .fft_confirm(fft_confirm),
-    .rst_n(rst_n),
+    .ad_clk(ad_clk),
+    .ad_data_in(ad_data_in),
+    .fft_clk(fft_clk),
+    .fft_data_in(fft_data),
+    .fft_data_valid(fft_data_valid),
+    .amp_choose(horizontal_zoom),
+    .fre_choose(vertical_zoom),
     
+    
+    //output
     .rstn_out(rstn_out),
     .iic_tx_scl( iic_tx_scl),
     .iic_tx_sda(iic_tx_sda),
@@ -492,4 +523,5 @@ module top(
     .g_out(g_out),
     .b_out(b_out)   
     );
+  
 endmodule
