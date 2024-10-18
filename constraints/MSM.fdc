@@ -148,6 +148,7 @@ define_attribute {p:ad_data_in[0]} {PAP_IO_VCCIO} {3.3}
 define_attribute {p:ad_data_in[0]} {PAP_IO_STANDARD} {LVCMOS33}
 define_attribute {p:ad_data_in[0]} {PAP_IO_NONE} {TRUE}
 
+
 # HDMI MODULE
 define_attribute {p:led_int} {PAP_IO_DIRECTION} {OUTPUT}
 define_attribute {p:led_int} {PAP_IO_LOC} {B2}
@@ -373,4 +374,3 @@ define_attribute {p:vs_out} {PAP_IO_STANDARD} {LVCMOS33}
 define_attribute {p:vs_out} {PAP_IO_DRIVE} {8}
 define_attribute {p:vs_out} {PAP_IO_NONE} {TRUE}
 define_attribute {p:vs_out} {PAP_IO_SLEW} {FAST}
-
