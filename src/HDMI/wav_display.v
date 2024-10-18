@@ -8,6 +8,10 @@ module wav_display(
 	input                       i_vs,    
 	input                       i_de,	
 	input[23:0]                 i_data,  
+    //input                       fft_confirm,
+    input                  [1:0] amp_choose,
+    input                  [1:0] fre_choose,
+    
 	output                      o_hs/* synthesis PAP_MARK_DEBUG="true" */,    
 	output                      o_vs/* synthesis PAP_MARK_DEBUG="true" */,    
 	output                      o_de/* synthesis PAP_MARK_DEBUG="true" */,    
@@ -46,6 +50,7 @@ assign o_data = v_data;
 assign o_hs = pos_hs;
 assign o_vs = pos_vs;
 assign o_de = pos_de;
+
 always@(posedge pclk)
 begin
 	if(pos_y >= 12'd9 && pos_y <= 12'd1075 && pos_x >= 12'd442 && pos_x  <= 12'd1522)
@@ -54,7 +59,30 @@ begin
 		region_active <= 1'b0;
 end
 
-always@(posedge pclk)
+// 1/2 of pclk
+reg pclk_div2;
+always @(posedge pclk) begin
+    pclk_div2 <= ~pclk_div2; 
+end
+
+// 1/3 of pclk
+reg [1:0] counter = 2'b0; 
+reg pclk_div3;         
+always @(posedge pclk) 
+begin
+        counter <= counter + 1'b1;   
+        if (counter == 2'b10)
+        begin  
+            counter <= 2'd0;
+            pclk_div3 <= ~pclk_div3;   
+        end
+end
+
+//choose which frequecy of wave
+wire wave_clk;
+assign wave_clk = fre_choose == 2'b00 ? pclk : (fre_choose == 2'b01 ? pclk_div2 : pclk_div3);
+ 
+always@(posedge wave_clk)
 begin
 	if(region_active == 1'b1 && pos_de == 1'b1)
 		rdaddress <= rdaddress + 10'd1;
@@ -62,15 +90,50 @@ begin
 		rdaddress <= 10'd0;
 end
 
-always@(posedge pclk)
+always@(posedge wave_clk)
 begin
-	if(region_active == 1'b1)
-		if((12'd1055- pos_y)/4 == {4'd0,q[7:0]})
-			v_data <= wave_color;
-		else
-			v_data <= pos_data;
-	else
-		v_data <= pos_data;
+    case(amp_choose)
+    2'b00:
+    begin
+	        if(region_active == 1'b1)
+		        if((12'd1055- pos_y)/4 == {4'd0,q[7:0]})
+			        v_data <= wave_color;
+		        else
+			        v_data <= pos_data;
+	        else
+		        v_data <= pos_data;
+    end
+    2'b01:
+    begin
+	        if(region_active == 1'b1)
+		        if((12'd928- pos_y)/3 == {4'd0,q[7:0]})
+			        v_data <= wave_color;
+		        else
+			        v_data <= pos_data;
+	        else
+		        v_data <= pos_data;
+    end
+    2'b10:
+    begin
+	        if(region_active == 1'b1)
+		        if((12'd800- pos_y)/2 == {4'd0,q[7:0]})
+			        v_data <= wave_color;
+		        else
+			        v_data <= pos_data;
+	        else
+		        v_data <= pos_data;
+    end
+    default:
+    begin
+	        if(region_active == 1'b1)
+		        if((12'd1055- pos_y)/4 == {4'd0,q[7:0]})
+			        v_data <= wave_color;
+		        else
+			        v_data <= pos_data;
+	        else
+		        v_data <= pos_data;
+    end
+    endcase
 end
 
 always @(posedge ad_clk ) begin

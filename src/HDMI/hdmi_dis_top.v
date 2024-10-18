@@ -1,10 +1,21 @@
 module hdmi_dis_top(
     input wire        sys_clk       ,// input system clock 50MHz
+    input             rst_n         ,//switch to idle menu
+    //control signals
     input      [1:0]  cnt_level1    ,// rec choose
     input             level         ,// level flag:0-->menu;1-->sub_modules
+    //sig_gen signals
     input      [10:0] sig_gen_cnt   ,// each sub_module's function:{cnt,cnt_l_r_sig,cnt_l_r_amp,cnt_l_r_fre,cnt_l_r_phase}
+    //osc signals
     input             fft_confirm   ,
-    input             rst_n         ,//switch to idle menu
+    input             ad_clk        ,
+    input       [7:0] ad_data_in    ,
+    input             fft_clk       ,
+    input       [31:0]fft_data_in   ,
+    input           fft_data_valid  ,
+    input           [1:0] amp_choose,
+    input           [1:0] fre_choose,
+    
         
     output            rstn_out      ,
     output            iic_tx_scl    ,
@@ -22,13 +33,13 @@ module hdmi_dis_top(
     );
 
     
-
+    //whole sig_gen and part of osc and logic_analyzer display module
     wire        pix_clk;
     wire        sig_gen_vs_out;
     wire        sig_gen_hs_out;
     wire        sig_gen_de_out;
     wire [23:0] sig_gen_rgb_out;
-    
+    //sig_gen and part of osc and logic analyzer display module
     hdmi_dis u_sig_hdmi(
     .sys_clk(sys_clk),
     .cnt_level1(cnt_level1),
@@ -52,12 +63,8 @@ module hdmi_dis_top(
     );
     
     assign vout_clk=pix_clk;
-    /*assign vs_out=sig_gen_vs_out;
-    assign hs_out=sig_gen_hs_out;
-    assign de_out=sig_gen_de_out;
-    assign {r_out,g_out,b_out}=sig_gen_rgb_out;*/
-
-
+    
+//osc display part
     //osc output grid
 grid_display grid_display_1(
 	.rst_n      (rst_n      ) ,                              
@@ -65,7 +72,8 @@ grid_display grid_display_1(
 	.i_hs       (sig_gen_hs_out) ,                            
 	.i_vs       (sig_gen_vs_out) ,                           
 	.i_de       (sig_gen_de_out) ,                          
-	.i_data     (sig_gen_rgb_out) ,                            
+	.i_data     (sig_gen_rgb_out) ,
+    .fft_confirm(fft_confirm) ,                            
 	.o_hs       (grid_hs_out) ,                          
 	.o_vs       (grid_vs_out) ,                          
 	.o_de       (grid_de_out) ,                          
@@ -77,76 +85,64 @@ wire grid_hs_out ;
 wire grid_de_out ;
 wire [23:0]  grid_data_out ;
 
-
-
-//osc output wave
+    //osc output wave
 wav_display wav_display_1(
 	.rst_n         (rst_n        ) ,                                      
 	.pclk          (pix_clk      ) ,                         
 	.wave_color    (24'hff0000) ,// wave color                              
-   .ad_clk        (ad_clk    ) ,                           
+    .ad_clk        (ad_clk    ) ,                           
 	.ad_data_in    (ad_data_in) ,                              
 	.i_hs          (grid_hs_out   ) ,                        
 	.i_vs          (grid_vs_out   ) ,                        
 	.i_de          (grid_de_out   ) ,                        
-	.i_data        (grid_data_out ) ,                          
-	.o_hs          (osc_hs_out        ) ,                        
-	.o_vs          (osc_vs_out        ) ,                        
-	.o_de          (osc_de_out        ) ,                        
-	.o_data        (osc_rgb_out       )                          
+	.i_data        (grid_data_out ) ,
+    //.fft_confirm   (fft_confirm   ),                          
+	.o_hs          (osc_hs_out1        ) ,                        
+	.o_vs          (osc_vs_out1        ) ,                        
+	.o_de          (osc_de_out1       ) ,                        
+	.o_data        (osc_rgb_out1       )                          
+);
+
+wav_display_fft wav_display_fft(
+	.rst_n         (rst_n        ) ,                                      
+	.pclk          (pix_clk      ) ,                         
+	.wave_color    (24'hff0000) ,// wave color                              
+    .fft_clk        (fft_clk    ) ,                           
+	.fft_data_in    (fft_data_in) ,                              
+	.i_hs          (grid_hs_out   ) ,                        
+	.i_vs          (grid_vs_out   ) ,                        
+	.i_de          (grid_de_out   ) ,                        
+	.i_data        (grid_data_out ) ,
+    .fft_data_valid(fft_data_valid) ,
+    //.fft_confirm   (fft_confirm   ),                          
+	.o_hs          (osc_hs_out2        ) ,                        
+	.o_vs          (osc_vs_out2        ) ,                        
+	.o_de          (osc_de_out2        ) ,                        
+	.o_data        (osc_rgb_out2       )                          
 );
 
     wire [23:0] osc_rgb_out;
     wire        osc_vs_out;
     wire        osc_hs_out;
     wire        osc_de_out;
+
+    wire [23:0] osc_rgb_out1;
+    wire        osc_vs_out1;
+    wire        osc_hs_out1;
+    wire        osc_de_out1;
+
+    wire [23:0] osc_rgb_out2;
+    wire        osc_vs_out2;
+    wire        osc_hs_out2;
+    wire        osc_de_out2;
     
-    /*//choose which hdmi_data to output        
-    always @(*)
-    begin
-        case(cnt)
-        2'b00://sig_gen's rgb_data
-        begin
-            vs_out=sig_gen_vs_out;
-            hs_out=sig_gen_hs_out;
-            de_out=sig_gen_de_out;
-            {r_out,g_out,b_out}=sig_gen_rgb_out;
-        end
-        2'b01://osc's rgb_data
-        begin
-            vs_out=osc_vs_out;
-            hs_out=osc_hs_out;
-            de_out=osc_de_out;
-            {r_out,g_out,b_out}=osc_rgb_out;
-        end
-        default:
-        begin
-            vs_out=sig_gen_vs_out;
-            hs_out=sig_gen_hs_out;
-            de_out=sig_gen_de_out;
-            {r_out,g_out,b_out}=sig_gen_rgb_out;
-        end
-        endcase
-    end*/
-
-    //choose which hdmi_data to output
-    /*assign vs_out = ({level,cntlevel1} == 3'b000|| {level,cntlevel1}==3'b001 || {level,cntlevel1}==3'b010) ? sig_gen_vs_out :
-                    ({level,cntlevel1} == 3'b010) ? osc_vs_out :
-                                     sig_gen_vs_out; // default case
-    assign vs_out = ({level,cntlevel1} == 3'b101 ? osc_vs_out : sig_gen_vs_out; // default case
-
-    assign hs_out = ({level,cntlevel1} == 3'b000|| {level,cntlevel1}==3'b001) ? sig_gen_hs_out :
-                    ({level,cntlevel1} == 3'b010) ? osc_hs_out :
-                                     sig_gen_hs_out; // default case
-
-    assign de_out = ({level,cntlevel1} == 3'b000|| {level,cntlevel1}==3'b001) ? sig_gen_de_out :
-                    ({level,cntlevel1} == 3'b010) ? osc_de_out :
-                                     sig_gen_de_out; // default case
-
-    assign {r_out, g_out, b_out} = ({level,cntlevel1} == 3'b000|| {level,cntlevel1}==3'b001) ? sig_gen_rgb_out :
-                                   ({level,cntlevel1} == 3'b010) ? osc_rgb_out :
-                                                    sig_gen_rgb_out; // default case*/
-
+    //choose time or fft wave to display
+    assign osc_rgb_out= fft_confirm ? osc_rgb_out2 : osc_rgb_out1;
+    assign osc_vs_out= fft_confirm ? osc_vs_out2 : osc_vs_out1;
+    assign osc_hs_out= fft_confirm ? osc_hs_out2 : osc_hs_out1;
+    assign osc_de_out= fft_confirm ? osc_de_out2 : osc_de_out1;
+    
+    //choose which type of signals to output
     assign vs_out = {level,cnt_level1} == 3'b101 ? osc_vs_out : sig_gen_vs_out;
     assign hs_out = {level,cnt_level1} == 3'b101 ? osc_hs_out : sig_gen_hs_out;
     assign de_out = {level,cnt_level1} == 3'b101 ? osc_de_out : sig_gen_de_out;
