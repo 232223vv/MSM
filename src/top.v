@@ -467,7 +467,7 @@ module top(
         .cnt_phase(cnt_phaseORduty),
         .confirm(confirm_done),
 
-        .data_out(ad_data_out)
+        .data_out(da_data_out)
     );
 
      wire fft_clk;
