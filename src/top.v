@@ -409,7 +409,7 @@ module top(
             vertical_zoom <= 2'd0;
             horizontal_zoom <= 2'd0;
         end
-        else if((cstate == OSI) && fft_confirm) begin
+        else if((cstate == OSI) && !fft_confirm) begin
             if(up) begin
                 if(vertical_zoom == 2'd2) begin
                     vertical_zoom <= 2'd0;
@@ -467,7 +467,8 @@ module top(
         .cnt_phase(cnt_phaseORduty),
         .confirm(confirm_done),
 
-        .data_out(da_data_out)
+        .data_out(da_data_out),
+        .da_clk(da_clk)
     );
 
      wire fft_clk;
@@ -505,8 +506,8 @@ module top(
     .fft_clk(fft_clk),
     .fft_data_in(fft_data),
     .fft_data_valid(fft_data_valid),
-    .amp_choose(horizontal_zoom),
-    .fre_choose(vertical_zoom),
+    .amp_choose(vertical_zoom),
+    .fre_choose(horizontal_zoom),
     
     
     //output

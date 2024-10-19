@@ -96,6 +96,8 @@ wav_display wav_display_1(
 	.i_vs          (grid_vs_out   ) ,                        
 	.i_de          (grid_de_out   ) ,                        
 	.i_data        (grid_data_out ) ,
+    .amp_choose    (amp_choose)     ,
+    .fre_choose    (fre_choose)     ,
     //.fft_confirm   (fft_confirm   ),                          
 	.o_hs          (osc_hs_out1        ) ,                        
 	.o_vs          (osc_vs_out1        ) ,                        
@@ -147,5 +149,8 @@ wav_display_fft wav_display_fft(
     assign hs_out = {level,cnt_level1} == 3'b101 ? osc_hs_out : sig_gen_hs_out;
     assign de_out = {level,cnt_level1} == 3'b101 ? osc_de_out : sig_gen_de_out;
     assign {r_out, g_out, b_out} = {level,cnt_level1} == 3'b101 ? osc_rgb_out : sig_gen_rgb_out;
+
+    
+        
      
 endmodule
