@@ -456,7 +456,84 @@ module top(
         end
     end
 
+    reg loa_left, loa_right, loa_pause;
+    always @(posedge clk_50M) begin
+        if(rst_n) begin
+            loa_pause <= 1'd0;
+        end
+        else if(cstate == LoA) begin
+            if(confirm) begin
+                if(loa_pause == 1'd0) begin
+                    loa_pause <= 1'd1;
+                end
+                else begin
+                    loa_pause <= 1'd0;
+                end
+            end
+            else begin
+                loa_pause <= loa_pause;
+            end
+        end
+        else begin
+            loa_pause <= 1'd0;
+        end
+    end
 
+    always @(posedge clk_50M) begin
+        if(!rst_n) begin
+            loa_left <= 1'd0;
+        end
+        else if ((cstate == LoA) && loa_pause) begin
+            loa_left <= up;
+        end
+        else begin
+            loa_left <= 1'd0;
+        end
+    end
+
+    always @(posedge clk_50M) begin
+        if(!rst_n) begin
+            loa_right <= 1'd0;
+        end
+        else if ((cstate == LoA) && loa_pause) begin
+            loa_right <= down;
+        end
+        else begin
+            loa_right <= 1'd0;
+        end
+    end
+
+    reg [11:0] loa_refline_x;
+    always @(posedge clk_50M) begin
+        if(!rst_n) begin
+            loa_refline_x <= 12'd0;
+        end
+        else if(cstate == LoA) begin
+            if(left) begin
+                if(loa_refline_x == 12'd0) begin
+                  loa_refline_x <= 12'd1400;
+                end
+                else begin
+                    loa_refline_x <= loa_refline_x - 12'd70;
+                end
+            end
+            else if(right) begin
+                if(loa_refline_x == 12'd1400) begin
+                    loa_refline_x <= 12'd0;
+                end
+                else begin
+                    loa_refline_x <= loa_refline_x + 12'd70;
+                end
+            end
+            else begin
+                loa_refline_x <= loa_refline_x;
+            end
+        end
+        else begin
+            loa_refline_x <= 12'd0;
+        end
+    end
+    
     sig_gen u_sig_gen(
         .clk(clk_50M),
         .rst_n(rst_n),
