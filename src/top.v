@@ -29,8 +29,8 @@ module top(
     );
 
     //button setting 0-1-4-5-2-3
-    wire left, right, confirm, quit, up, down;
-    wire tx_left, tx_right, tx_confirm, tx_quit, tx_up, tx_down;
+    wire left, right, confirm, quit, up, down, loa_sclk_change;
+    wire tx_left, tx_right, tx_confirm, tx_quit, tx_up, tx_down, tx_loa_sclk_change;
 
     buttopn_debounde 
     #(
@@ -103,8 +103,15 @@ module top(
     .bd_tx(tx_down),
     .release_sign(down)
     );
+    buttopn_debounde_down (
+    .clk(clk_50M),
+    .tx(key_in[6]),
+    .reset(rst_n),
+    .bd_tx(tx_loa_sclk_change),
+    .release_sign(loa_sclk_change)
+    );
 
-    // control module
+    // STATE CHANGE
     localparam TOP = 2'D0, SIG = 2'D1, OSI = 2'D2, LoA = 2'D3;
     reg[1:0] cstate, nstate;
     reg level;
@@ -186,7 +193,7 @@ module top(
 
     reg[1:0] cntlevel1;
 
-    // top
+    // TOP
     always @(posedge clk_50M) begin
         if (!rst_n) begin
             cntlevel1 <= 2'b00;
@@ -385,7 +392,7 @@ module top(
         end
     end
 
-         // OSI
+    // OSC
     reg fft_confirm;
     always @(posedge clk_50M) begin
         if(!rst_n) begin
@@ -457,6 +464,7 @@ module top(
         end
     end
 
+    // LOA
     reg loa_left, loa_right, loa_pause;
     always @(posedge clk_50M) begin
         if(rst_n) begin
@@ -532,6 +540,29 @@ module top(
         end
         else begin
             loa_refline_x <= 12'd0;
+        end
+    end
+
+    reg [3:0] loa_sclk_cnt;
+    always @(posedge clk_50M) begin
+        if(!rst_n) begin
+            loa_sclk_cnt <= 4'd0;
+        end
+        else if(cstate == LoA) begin
+            if(loa_sclk_change) begin
+                if(loa_sclk_cnt == 4'd13) begin
+                    loa_sclk_cnt <= 4'd0;
+                end
+                else begin
+                    loa_sclk_cnt <= loa_sclk_cnt + 1'd1;
+                end
+            end
+            else begin
+                loa_sclk_cnt <= loa_sclk_cnt;
+            end
+        end
+        else begin
+            loa_sclk_change <=  4'd0;
         end
     end
     
