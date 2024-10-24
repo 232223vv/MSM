@@ -44,6 +44,7 @@ define_attribute {p:key_in[0]} {PAP_IO_LOC} {K18}
 define_attribute {p:key_in[0]} {PAP_IO_VCCIO} {3.3}
 define_attribute {p:key_in[0]} {PAP_IO_STANDARD} {LVCMOS12}
 define_attribute {p:key_in[0]} {PAP_IO_NONE} {TRUE}
+
 # ADDA MODULE
 define_attribute {p:da_clk} {PAP_IO_DIRECTION} {OUTPUT}
 define_attribute {p:da_clk} {PAP_IO_LOC} {W10}
@@ -381,3 +382,45 @@ define_attribute {p:vs_out} {PAP_IO_STANDARD} {LVCMOS33}
 define_attribute {p:vs_out} {PAP_IO_DRIVE} {8}
 define_attribute {p:vs_out} {PAP_IO_NONE} {TRUE}
 define_attribute {p:vs_out} {PAP_IO_SLEW} {FAST}
+
+# PMOD IN
+define_attribute {p:pmod_in[7]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:pmod_in[7]} {PAP_IO_LOC} {T7}
+define_attribute {p:pmod_in[7]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:pmod_in[7]} {PAP_IO_STANDARD} {LVCMOS12}
+define_attribute {p:pmod_in[7]} {PAP_IO_NONE} {TRUE}
+define_attribute {p:pmod_in[6]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:pmod_in[6]} {PAP_IO_LOC} {U6}
+define_attribute {p:pmod_in[6]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:pmod_in[6]} {PAP_IO_STANDARD} {LVCMOS12}
+define_attribute {p:pmod_in[6]} {PAP_IO_NONE} {TRUE}
+define_attribute {p:pmod_in[5]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:pmod_in[5]} {PAP_IO_LOC} {W9}
+define_attribute {p:pmod_in[5]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:pmod_in[5]} {PAP_IO_STANDARD} {LVCMOS12}
+define_attribute {p:pmod_in[5]} {PAP_IO_NONE} {TRUE}
+define_attribute {p:pmod_in[4]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:pmod_in[4]} {PAP_IO_LOC} {Y8}
+define_attribute {p:pmod_in[4]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:pmod_in[4]} {PAP_IO_STANDARD} {LVCMOS12}
+define_attribute {p:pmod_in[4]} {PAP_IO_NONE} {TRUE}
+define_attribute {p:pmod_in[3]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:pmod_in[3]} {PAP_IO_LOC} {Y7}
+define_attribute {p:pmod_in[3]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:pmod_in[3]} {PAP_IO_STANDARD} {LVCMOS12}
+define_attribute {p:pmod_in[3]} {PAP_IO_NONE} {TRUE}
+define_attribute {p:pmod_in[2]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:pmod_in[2]} {PAP_IO_LOC} {AB7}
+define_attribute {p:pmod_in[2]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:pmod_in[2]} {PAP_IO_STANDARD} {LVCMOS12}
+define_attribute {p:pmod_in[2]} {PAP_IO_NONE} {TRUE}
+define_attribute {p:pmod_in[1]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:pmod_in[1]} {PAP_IO_LOC} {AA6}
+define_attribute {p:pmod_in[1]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:pmod_in[1]} {PAP_IO_STANDARD} {LVCMOS12}
+define_attribute {p:pmod_in[1]} {PAP_IO_NONE} {TRUE}
+define_attribute {p:pmod_in[0]} {PAP_IO_DIRECTION} {INPUT}
+define_attribute {p:pmod_in[0]} {PAP_IO_LOC} {AB6}
+define_attribute {p:pmod_in[0]} {PAP_IO_VCCIO} {3.3}
+define_attribute {p:pmod_in[0]} {PAP_IO_STANDARD} {LVCMOS12}
+define_attribute {p:pmod_in[0]} {PAP_IO_NONE} {TRUE}
