@@ -4,6 +4,7 @@ module top(
 
     
     input [7:0] key_in,
+    input [7:0] pmod_in,
 
      // ad_da module
     input [7:0] ad_data_in,
