@@ -1,16 +1,15 @@
 module top(
-    input  wire clk_50M ,
-    input  wire rst_n,
+    input  wire clk_50M             ,
+    input  wire rst_n               ,
 
     
-    input [7:0] key_in,
-    input [7:0] pmod_in,
+    input [7:0] key_in              ,
 
      // ad_da module
-    input [7:0] ad_data_in,
-    output [7:0] da_data_out,
-    output da_clk,
-    output ad_clk,
+    input [7:0] ad_data_in          ,
+    output [7:0] da_data_out        ,
+    output da_clk                   ,
+    output ad_clk                   ,
 
     //hdmi signals
     output            rstn_out      ,
@@ -24,13 +23,16 @@ module top(
     output            de_out        ,
     output      [7:0]  r_out        , 
     output      [7:0]  g_out        , 
-    output      [7:0]  b_out   
+    output      [7:0]  b_out        ,
+
+    //logic_analyzer signals 
+    input [7:0] pmod_in
 
     );
 
     //button setting 0-1-4-5-2-3
-    wire left, right, confirm, quit, up, down, loa_sclk_change;
-    wire tx_left, tx_right, tx_confirm, tx_quit, tx_up, tx_down, tx_loa_sclk_change;
+    wire left, right, confirm, quit, up, down;
+    wire tx_left, tx_right, tx_confirm, tx_quit, tx_up, tx_down;
 
     buttopn_debounde 
     #(
@@ -103,15 +105,8 @@ module top(
     .bd_tx(tx_down),
     .release_sign(down)
     );
-    buttopn_debounde_down (
-    .clk(clk_50M),
-    .tx(key_in[6]),
-    .reset(rst_n),
-    .bd_tx(tx_loa_sclk_change),
-    .release_sign(loa_sclk_change)
-    );
 
-    // STATE CHANGE
+    // control module
     localparam TOP = 2'D0, SIG = 2'D1, OSI = 2'D2, LoA = 2'D3;
     reg[1:0] cstate, nstate;
     reg level;
@@ -437,6 +432,9 @@ module top(
             else begin
                 vertical_zoom <= vertical_zoom;
             end
+
+
+
                 
             if(left) begin
                 if(horizontal_zoom == 2'd0) begin
@@ -464,10 +462,9 @@ module top(
         end
     end
 
-    // LOA
     reg loa_left, loa_right, loa_pause;
     always @(posedge clk_50M) begin
-        if(rst_n) begin
+        if(!rst_n) begin
             loa_pause <= 1'd0;
         end
         else if(cstate == LoA) begin
@@ -512,26 +509,55 @@ module top(
         end
     end
 
+    // reg loa_mode;
+    // always @(posedge clk_50M) begin
+    //     if(!rst_n) begin
+    //         loa_mode <= 1'd1;
+    //     end
+    //     else if(cstate == TOP) begin
+    //         if(up) begin
+    //             loa_mode <= 1'd1;
+    //         end
+    //         else if(down) begin
+    //             loa_mode <= 1'd0;
+    //         end
+    //         else begin
+    //             loa_mode <= loa_mode;
+    //         end
+    //     end
+    //     else if(cstate == LoA)begin
+    //         if(quit) begin
+    //             loa_mode <= 1'd1;
+    //         end
+    //         else begin
+    //             loa_mode <= loa_mode;
+    //         end
+    //     end
+    //     else begin
+    //         loa_mode <= 1'd1;
+    //     end
+    // end
+
     reg [11:0] loa_refline_x;
     always @(posedge clk_50M) begin
         if(!rst_n) begin
-            loa_refline_x <= 12'd0;
+            loa_refline_x <= 12'd80;
         end
         else if(cstate == LoA) begin
             if(left) begin
-                if(loa_refline_x == 12'd0) begin
-                  loa_refline_x <= 12'd1400;
+                if(loa_refline_x == 12'd80) begin
+                  loa_refline_x <= 12'd1440;
                 end
                 else begin
-                    loa_refline_x <= loa_refline_x - 12'd70;
+                    loa_refline_x <= loa_refline_x - 12'd80;
                 end
             end
             else if(right) begin
-                if(loa_refline_x == 12'd1400) begin
-                    loa_refline_x <= 12'd0;
+                if(loa_refline_x == 12'd1440) begin
+                    loa_refline_x <= 12'd80;
                 end
                 else begin
-                    loa_refline_x <= loa_refline_x + 12'd70;
+                    loa_refline_x <= loa_refline_x + 12'd80;
                 end
             end
             else begin
@@ -539,33 +565,31 @@ module top(
             end
         end
         else begin
-            loa_refline_x <= 12'd0;
+            loa_refline_x <= 12'd80;
         end
     end
 
-    reg [3:0] loa_sclk_cnt;
-    always @(posedge clk_50M) begin
-        if(!rst_n) begin
-            loa_sclk_cnt <= 4'd0;
+    reg [2:0] loastate;
+    always@(posedge clk_50M) begin
+        loastate = level * 4 + cntlevel1; 
+    end 
+
+    reg loa_en;
+    always@(posedge clk_50M) begin
+        if(!rst_n) begin 
+            loa_en <= 1'b0;        
         end
-        else if(cstate == LoA) begin
-            if(loa_sclk_change) begin
-                if(loa_sclk_cnt == 4'd13) begin
-                    loa_sclk_cnt <= 4'd0;
-                end
-                else begin
-                    loa_sclk_cnt <= loa_sclk_cnt + 1'd1;
-                end
-            end
-            else begin
-                loa_sclk_cnt <= loa_sclk_cnt;
-            end
+        else if(loastate == 3'b110) begin
+            loa_en <= 1'b1;
         end
         else begin
-            loa_sclk_change <=  4'd0;
+            loa_en <= 1'b0;
         end
     end
-    
+
+    assign led_loa_en = loa_en;
+
+    //SIG_GEN 
     sig_gen u_sig_gen(
         .clk(clk_50M),
         .rst_n(rst_n),
@@ -579,36 +603,54 @@ module top(
         .data_out(da_data_out),
         .da_clk(da_clk)
     );
-
-     wire fft_clk;
-     wire [31:0] fft_data;
-     wire fft_data_valid;
-     oscilloscope_top u_oscilloscope(
-         .clk(clk_50M),
-         .oscilloscope_en((cnt_level1==2'b01 && level==1'b1)),
-         .fft_en(fft_confirm),
-         .rst_n(rst_n),
-         .ad_data_in(ad_data_in),
-         .fft_data_valid(fft_data_valid),
-         //.ad_data(),
-         .fft_clk(fft_clk),
-         .fft_data(fft_data),
-         .ad_clk(ad_clk)
-     );
     
-        
-
-    //hdmi display module
+    //OSC    
+    wire fft_clk;
+    wire [31:0] fft_data;
+    wire fft_data_valid;
+    oscilloscope_top u_oscilloscope(
+        .clk(clk_50M),
+        .oscilloscope_en((cnt_level1==2'b01 && level==1'b1)),
+        .fft_en(fft_confirm),
+        .rst_n(rst_n),
+        .ad_data_in(ad_data_in),
+        .fft_data_valid(fft_data_valid),
+        .fft_clk(fft_clk),
+        .fft_data(fft_data),
+        .ad_clk(ad_clk)
+    );
+    
+    //LOA    
+    wire [7:0] rd_data;
+    wire rd_clk;
+    wire [16:0] rd_addr;
+    la_pmod_top loa(
+        .clk_50M(clk_50M),
+        .rst_n(rst_n),
+        .rd_clk(rd_clk),
+        .rd_addr(rd_addr),
+        .la_data(rd_data),
+        .channel_sel(4'd2),
+        .pmod_data_in(pmod_in),
+        .act(loa_en),
+        .mode_sel(3'd3),
+        .div_sel(4'd10),
+    );
+    
+    //HDMI
     hdmi_dis_top hdmi_display(
     //input
     .sys_clk(clk_50M),
     .rst_n(rst_n),
 
+    //control signals
     .cnt_level1(cntlevel1),
     .level(level),
 
+    //sig_gen signals
     .sig_gen_cnt({cntlevel2_sig, cnt_wave, cnt_amp, cnt_fre, cnt_phaseORduty}),
 
+    //osc signals
     .fft_confirm(fft_confirm),
     .ad_clk(ad_clk),
     .ad_data_in(ad_data_in),
@@ -617,7 +659,15 @@ module top(
     .fft_data_valid(fft_data_valid),
     .amp_choose(vertical_zoom),
     .fre_choose(horizontal_zoom),
-    
+
+    //logic analyzer signals
+    .marker(loa_refline_x),//vertical mark line
+    .rd_data(rd_data),
+    .mov_left(loa_left),
+    .mov_right(loa_right),
+    .stop(loa_pause),
+    .rd_clk(rd_clk),
+    .rd_addr(rd_addr),
     
     //output
     .rstn_out(rstn_out),
