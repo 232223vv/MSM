@@ -10,5 +10,5 @@ saw_gen the_instance_name (
   .addr(addr),          // input [10:0]
   .clk(clk),            // input
   .rst(rst),            // input
-  .rd_data(rd_data)     // output [17:0]
+  .rd_data(rd_data)     // output [7:0]
 );

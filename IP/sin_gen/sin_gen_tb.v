@@ -35,7 +35,7 @@ localparam RESET_TYPE = "ASYNC" ; // @IPC enum Sync_Internally,SYNC,ASYNC
 
 localparam POWER_OPT = 0 ; // @IPC bool
 
-localparam INIT_FILE = "D:/GITProjects/MSM/src/SIGNAL_GENERATER/sin_2000hex.dat" ; // @IPC string
+localparam INIT_FILE = "D:/FPGA_PDS/projects/hahaha/sin_2000hex.dat" ; // @IPC string
 
 localparam INIT_FORMAT = "HEX" ; // @IPC enum BIN,HEX
 

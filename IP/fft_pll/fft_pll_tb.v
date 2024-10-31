@@ -176,6 +176,7 @@ GTP_GRS GRS_INST(
 
 fft_pll U_fft_pll (
 .clkout0(clkout0),
+    .clkout1(clkout1),
     
     .clkin1(clkin1),
     

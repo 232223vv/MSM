@@ -1,7 +1,7 @@
 IP Generator (Version 2022.1 build 99559)
 Check out license ...
-Start generating at 2024-10-28 18:08
-Instance: la_pll (D:\VProjects\MSM\ipcore\la_pll\la_pll.idf)
+Start generating at 2024-10-28 17:18
+Instance: la_pll (D:\FPGA_PDS\projects\MSM_test_simple\MSM_test_simple\ipcore\la_pll\la_pll.idf)
 IP: PLL (1.5)
 Part: Logos-PGL50H-FBG484--6
 Create directory 'rtl' ...

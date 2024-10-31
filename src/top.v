@@ -31,8 +31,8 @@ module top(
     );
 
     //button setting 0-1-4-5-2-3
-    wire left, right, confirm, quit, up, down;
-    wire tx_left, tx_right, tx_confirm, tx_quit, tx_up, tx_down;
+    wire left, right, confirm, quit, up, down, loa_confirm;
+    wire tx_left, tx_right, tx_confirm, tx_quit, tx_up, tx_down, tx_loa_confirm;
 
     buttopn_debounde 
     #(
@@ -104,6 +104,18 @@ module top(
     .reset(rst_n),
     .bd_tx(tx_down),
     .release_sign(down)
+    );
+
+    buttopn_debounde 
+    #(
+    .delay(1000)
+    )
+    buttopn_debounde_loaconfirm (
+    .clk(clk_50M),
+    .tx(key_in[6]),
+    .reset(rst_n),
+    .bd_tx(tx_loa_confirm),
+    .release_sign(loa_confirm)
     );
 
     // control module
@@ -431,11 +443,7 @@ module top(
             end
             else begin
                 vertical_zoom <= vertical_zoom;
-            end
-
-
-
-                
+            end      
             if(left) begin
                 if(horizontal_zoom == 2'd0) begin
                     horizontal_zoom <= 2'd2;
@@ -509,34 +517,34 @@ module top(
         end
     end
 
-    // reg loa_mode;
-    // always @(posedge clk_50M) begin
-    //     if(!rst_n) begin
-    //         loa_mode <= 1'd1;
-    //     end
-    //     else if(cstate == TOP) begin
-    //         if(up) begin
-    //             loa_mode <= 1'd1;
-    //         end
-    //         else if(down) begin
-    //             loa_mode <= 1'd0;
-    //         end
-    //         else begin
-    //             loa_mode <= loa_mode;
-    //         end
-    //     end
-    //     else if(cstate == LoA)begin
-    //         if(quit) begin
-    //             loa_mode <= 1'd1;
-    //         end
-    //         else begin
-    //             loa_mode <= loa_mode;
-    //         end
-    //     end
-    //     else begin
-    //         loa_mode <= 1'd1;
-    //     end
-    // end
+    reg loa_mode;
+    always @(posedge clk_50M) begin
+        if(!rst_n) begin
+            loa_mode <= 1'd1;
+        end
+        else if(~level && (cntlevel1 == 2'b10)) begin
+            if(up) begin
+                loa_mode <= 1'd1;
+            end
+            else if(down) begin
+                loa_mode <= 1'd0;
+            end
+            else begin
+                loa_mode <= loa_mode;
+            end
+        end
+        else if(cstate == LoA)begin
+            if(quit) begin
+                loa_mode <= 1'd1;
+            end
+            else begin
+                loa_mode <= loa_mode;
+            end
+        end
+        else begin
+            loa_mode <= 1'd1;
+        end
+    end
 
     reg [11:0] loa_refline_x;
     always @(posedge clk_50M) begin
@@ -569,29 +577,80 @@ module top(
         end
     end
 
-    reg [2:0] loastate;
-    always@(posedge clk_50M) begin
-        loastate = level * 4 + cntlevel1; 
-    end 
+    // reg [2:0] loastate;
+    // always@(posedge clk_50M) begin
+    //     loastate = level * 4 + cntlevel1; 
+    // end 
 
     reg loa_en;
-    always@(posedge clk_50M) begin
-        if(!rst_n) begin 
-            loa_en <= 1'b0;        
+    // always@(posedge clk_50M) begin
+    //     if(!rst_n) begin 
+    //         loa_en <= 1'b0;        
+    //     end
+    //     else if(loastate == 3'b110) begin
+    //         loa_en <= 1'b1;
+    //     end
+    //     else begin
+    //         loa_en <= 1'b0;
+    //     end
+    // end
+    // assign led_loa_en = loa_en;
+
+    reg [3:0] loa_sclk;
+    // reg loa_confirm;
+    always @(clk_50M) begin
+        if(!rst_n) begin
+            loa_sclk <= 4'd10;
         end
-        else if(loastate == 3'b110) begin
-            loa_en <= 1'b1;
+        else if((cstate == LoA) && ~loa_pause) begin
+            if(up) begin
+                if(loa_sclk == 4'd13) begin
+                    loa_sclk <= 4'd0;
+                end
+                else begin
+                    loa_sclk <= loa_sclk + 1'd1;
+                end
+            end
+            else if(down) begin
+                if(loa_sclk == 4'd0) begin
+                    loa_sclk <= 4'd13;
+                end
+                else begin
+                    loa_sclk <= loa_sclk + 1'd1;
+                end
+            end
+            else begin
+                loa_sclk <= loa_sclk;
+            end
+        end
+        else if((cstate == LoA) && loa_pause)begin
+            loa_sclk <= loa_sclk;
         end
         else begin
-            loa_en <= 1'b0;
+            loa_sclk <= 4'd10;
         end
     end
 
-    assign led_loa_en = loa_en;
+    always @(posedge clk_50M) begin
+        if(!rst_n) begin
+            loa_en <= 1'd0;
+        end
+        else if(cstate == LoA) begin
+            if(loa_confirm) begin
+                loa_en <= 1'd1;
+            end
+            else begin
+                loa_en <= loa_en;
+            end
+        end
+        else begin
+            loa_en <= 1'd0;
+        end
+    end
 
     //SIG_GEN 
     sig_gen u_sig_gen(
-        .clk(clk_50M),
+        .clk_50M(clk_50M),
         .rst_n(rst_n),
 
         .cnt_sig(cnt_wave),
@@ -609,7 +668,7 @@ module top(
     wire [31:0] fft_data;
     wire fft_data_valid;
     oscilloscope_top u_oscilloscope(
-        .clk(clk_50M),
+        .clk_50M(clk_50M),
         .oscilloscope_en((cnt_level1==2'b01 && level==1'b1)),
         .fft_en(fft_confirm),
         .rst_n(rst_n),

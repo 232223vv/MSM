@@ -23,7 +23,7 @@ module  saw_gen_tb;
 
 localparam ADDR_WIDTH = 11 ; // @IPC int 9,20
 
-localparam DATA_WIDTH = 18 ; // @IPC int 1,1152
+localparam DATA_WIDTH = 8 ; // @IPC int 1,1152
 
 localparam OUTPUT_REG = 0 ; // @IPC bool
 
@@ -35,7 +35,7 @@ localparam RESET_TYPE = "ASYNC" ; // @IPC enum Sync_Internally,SYNC,ASYNC
 
 localparam POWER_OPT = 0 ; // @IPC bool
 
-localparam INIT_FILE = "D:/GITProjects/MSM/src/SIGNAL_GENERATER/saw_2000hex.dat" ; // @IPC string
+localparam INIT_FILE = "D:/FPGA_PDS/projects/hahaha/saw_2000hex.dat" ; // @IPC string
 
 localparam INIT_FORMAT = "HEX" ; // @IPC enum BIN,HEX
 

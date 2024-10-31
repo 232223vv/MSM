@@ -15,36 +15,28 @@
     </header>
     <param_list>
         <param>
-            <name>INIT_FORMAT</name>
-            <value>HEX</value>
-        </param>
-        <param>
-            <name>ADDR_STROBE_EN</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>RD_OCE_EN</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>INIT_EN</name>
-            <value>true</value>
-        </param>
-        <param>
-            <name>ADDR_WIDTH</name>
-            <value>11</value>
+            <name>DATA_WIDTH</name>
+            <value>8</value>
         </param>
         <param>
             <name>DRM_MODE_SEL</name>
             <value>AUTO</value>
         </param>
         <param>
-            <name>INIT_FILE</name>
-            <value>D:/GITProjects/MSM/src/SIGNAL_GENERATER/saw_2000hex.dat</value>
+            <name>INIT_FORMAT</name>
+            <value>HEX</value>
         </param>
         <param>
-            <name>DATA_WIDTH</name>
-            <value>18</value>
+            <name>MODE_18K</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>RESET_TYPE</name>
+            <value>ASYNC</value>
+        </param>
+        <param>
+            <name>MODE_9K</name>
+            <value>false</value>
         </param>
         <param>
             <name>POWER_OPT</name>
@@ -55,23 +47,31 @@
             <value>false</value>
         </param>
         <param>
-            <name>MODE_18K</name>
-            <value>true</value>
+            <name>INIT_FILE</name>
+            <value>D:/FPGA_PDS/projects/hahaha/saw_2000hex.dat</value>
         </param>
         <param>
-            <name>MODE_9K</name>
+            <name>CLK_EN</name>
             <value>false</value>
         </param>
         <param>
-            <name>RESET_TYPE</name>
-            <value>ASYNC</value>
+            <name>RD_OCE_EN</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>ADDR_WIDTH</name>
+            <value>11</value>
+        </param>
+        <param>
+            <name>INIT_EN</name>
+            <value>true</value>
         </param>
         <param>
             <name>CLK_OR_POL_INV</name>
             <value>false</value>
         </param>
         <param>
-            <name>CLK_EN</name>
+            <name>ADDR_STROBE_EN</name>
             <value>false</value>
         </param>
     </param_list>
@@ -101,7 +101,7 @@
             <text>rd_data</text>
             <dir>output</dir>
             <pos>right</pos>
-            <msb>17</msb>
+            <msb>7</msb>
             <lsb>0</lsb>
         </pin>
     </pin_list>

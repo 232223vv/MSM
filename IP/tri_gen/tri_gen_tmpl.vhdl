@@ -11,7 +11,7 @@ COMPONENT tri_gen
     addr : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
     clk : IN STD_LOGIC;
     rst : IN STD_LOGIC;
-    rd_data : OUT STD_LOGIC_VECTOR(17 DOWNTO 0)
+    rd_data : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
   );
 END COMPONENT;
 

@@ -20,24 +20,25 @@
 module fft_pll (
     clkin1,
     clkout0,
+    clkout1,
     
     pll_lock
     );
 
     localparam real CLKIN_FREQ          = 50.0;
-    localparam integer STATIC_RATIOI    = 2;
-    localparam integer STATIC_RATIO0    = 150;
-    localparam integer STATIC_RATIO1    = 16;
+    localparam integer STATIC_RATIOI    = 5;
+    localparam integer STATIC_RATIO0    = 245;
+    localparam integer STATIC_RATIO1    = 33;
     localparam integer STATIC_RATIO2    = 16;
     localparam integer STATIC_RATIO3    = 16;
     localparam integer STATIC_RATIO4    = 16;
-    localparam integer STATIC_RATIOF    = 24;
-    localparam integer STATIC_DUTY0     = 150;
-    localparam integer STATIC_DUTY1     = 16;
+    localparam integer STATIC_RATIOF    = 98;
+    localparam integer STATIC_DUTY0     = 245;
+    localparam integer STATIC_DUTY1     = 33;
     localparam integer STATIC_DUTY2     = 16;
     localparam integer STATIC_DUTY3     = 16;
     localparam integer STATIC_DUTY4     = 16;
-    localparam integer STATIC_DUTYF     = 24;
+    localparam integer STATIC_DUTYF     = 98;
     localparam integer STATIC_PHASE0    = 16;
     localparam integer STATIC_PHASE1    = 16;
     localparam integer STATIC_PHASE2    = 16;
@@ -56,7 +57,7 @@ module fft_pll (
     localparam CLKOUT4_GATE_EN          = "FALSE";
     localparam FBMODE                   = "FALSE";
     localparam integer FBDIV_SEL        = 0;
-    localparam BANDWIDTH                = "OPTIMIZED";
+    localparam BANDWIDTH                = "LOW";
     localparam PFDEN_EN                 = "FALSE";
     localparam VCOCLK_DIV2              = 1'b0;
     localparam DYNAMIC_RATIOI_EN        = "FALSE";
@@ -100,6 +101,7 @@ module fft_pll (
 
     input clkin1;
     output clkout0;
+    output clkout1;
     
     output pll_lock;
 

@@ -19,19 +19,23 @@
             <value>8</value>
         </param>
         <param>
-            <name>ADDR_WIDTH</name>
-            <value>11</value>
+            <name>DRM_MODE_SEL</name>
+            <value>AUTO</value>
         </param>
         <param>
-            <name>ADDR_STROBE_EN</name>
-            <value>false</value>
+            <name>INIT_FORMAT</name>
+            <value>HEX</value>
         </param>
         <param>
-            <name>CLK_OR_POL_INV</name>
-            <value>false</value>
+            <name>MODE_18K</name>
+            <value>true</value>
         </param>
         <param>
-            <name>OUTPUT_REG</name>
+            <name>RESET_TYPE</name>
+            <value>ASYNC</value>
+        </param>
+        <param>
+            <name>MODE_9K</name>
             <value>false</value>
         </param>
         <param>
@@ -39,40 +43,36 @@
             <value>false</value>
         </param>
         <param>
-            <name>INIT_FORMAT</name>
-            <value>HEX</value>
-        </param>
-        <param>
-            <name>RESET_TYPE</name>
-            <value>ASYNC</value>
-        </param>
-        <param>
-            <name>INIT_FILE</name>
-            <value>D:/GITProjects/MSM/src/SIGNAL_GENERATER/sin_2000hex.dat</value>
-        </param>
-        <param>
-            <name>RD_OCE_EN</name>
+            <name>OUTPUT_REG</name>
             <value>false</value>
         </param>
         <param>
-            <name>INIT_EN</name>
-            <value>true</value>
+            <name>INIT_FILE</name>
+            <value>D:/FPGA_PDS/projects/hahaha/sin_2000hex.dat</value>
         </param>
         <param>
             <name>CLK_EN</name>
             <value>false</value>
         </param>
         <param>
-            <name>DRM_MODE_SEL</name>
-            <value>AUTO</value>
-        </param>
-        <param>
-            <name>MODE_9K</name>
+            <name>RD_OCE_EN</name>
             <value>false</value>
         </param>
         <param>
-            <name>MODE_18K</name>
+            <name>ADDR_WIDTH</name>
+            <value>11</value>
+        </param>
+        <param>
+            <name>INIT_EN</name>
             <value>true</value>
+        </param>
+        <param>
+            <name>CLK_OR_POL_INV</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>ADDR_STROBE_EN</name>
+            <value>false</value>
         </param>
     </param_list>
     <pin_list>

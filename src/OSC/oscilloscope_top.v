@@ -1,5 +1,5 @@
 module oscilloscope_top(
-   input    wire  clk           ,
+   input    wire  clk_50M           ,
    input    wire  oscilloscope_en                ,
    input    wire  fft_en    ,
    input    wire  rst_n             ,

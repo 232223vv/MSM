@@ -1,7 +1,7 @@
 IP Generator (Version 2022.1 build 99559)
 Check out license ...
-Start generating at 2024-10-15 13:02
-Instance: sin_gen (D:\VProjects\MSM\ipcore\sin_gen\sin_gen.idf)
+Start generating at 2024-10-31 18:57
+Instance: sin_gen (D:\FPGA_PDS\projects\hahaha\ipcore\sin_gen\sin_gen.idf)
 IP: DRM Based ROM (1.5)
 Part: Logos-PGL50H-FBG484--6
 Create directory 'rtl' ...

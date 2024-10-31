@@ -1,5 +1,5 @@
 module sig_gen(
-    input clk,
+    input clk_50M,
     input rst_n,
     input [1:0] cnt_sig,
     input [1:0] cnt_amp,
