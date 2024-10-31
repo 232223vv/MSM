@@ -31,8 +31,8 @@ input [7:0]data_in, //被测信号输入
 //----------------模块输出端口----------------
 output [16:0]wr_addr, //写 RAM 地址
 output [7:0]wr_data, //写 RAM 数据
-output  wren, //写使能
-output actled
+output  wren //写使能
+
 );
 //----------------模块输入端口----------------
 
@@ -52,8 +52,8 @@ wire [7:0] s_edge; //边沿标志
 assign wr_data = data_r2; //采集数据输出至 RAM
 assign wren=wren_temp;
 assign wr_addr=wr_addr_temp;
-assign trigger_led = flag;
-assign actled = act;
+
+
 //----------------同步输入信号----------------
 always@(posedge clk_50M)
     if(clk_sample) begin
