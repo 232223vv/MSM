@@ -1,140 +1,189 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2024/10/24 19:08:33
-// Design Name: 
-// Module Name: sample
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
 module sample(
-   input clk_50M, //ÏµÍ³Ê±ÖÓ 50MHZ
+input clk_50M, //ÏµÍ³Ê±ï¿½ï¿½ 50MHZ
 input rst_n, //
-input clk_sample, //Ê±ÖÓÊ¹ÄÜ
-input act, //Æô¶¯´¥·¢
-input [3:0]channel_sel, //Í¨µÀÑ¡Ôñ
-input [2:0]mode_sel, //Ä£Ê½Ñ¡Ôñ
-input [7:0]data_in, //±»²âÐÅºÅÊäÈë
-//----------------Ä£¿éÊä³ö¶Ë¿Ú----------------
-output [16:0]wr_addr, //Ð´ RAM µØÖ·
-output [7:0]wr_data, //Ð´ RAM Êý¾Ý
-output  wren //Ð´Ê¹ÄÜ
-
+input clken, //Ê±ï¿½ï¿½Ê¹ï¿½ï¿½
+input act, //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+input [3:0]channel_sel, //Í¨ï¿½ï¿½Ñ¡ï¿½ï¿½
+input [2:0]mode_sel, //Ä£Ê½Ñ¡ï¿½ï¿½
+input [7:0]data_in, //ï¿½ï¿½ï¿½ï¿½ï¿½Åºï¿½ï¿½ï¿½ï¿½ï¿½
+input [1:0]cnt_loa,
+//----------------Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¿ï¿½----------------
+output [14:0]wr_addr,
+output [10:0]wr_addr_cons, //Ð´ RAM ï¿½ï¿½Ö·
+output [7:0]wr_data, //Ð´ RAM ï¿½ï¿½ï¿½ï¿½
+output  wren //Ð´Ê¹ï¿½ï¿½
 );
-//----------------Ä£¿éÊäÈë¶Ë¿Ú----------------
+//----------------Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¿ï¿½----------------
 
-//----------------I/O ¼Ä´æÆ÷----------------
-reg [7:0]data_r1; //ÊäÈëÐÅºÅÍ¬²½¼Ä´æÆ÷
+//----------------I/O ï¿½Ä´ï¿½ï¿½ï¿½----------------
+reg [7:0]data_r1; //ï¿½ï¿½ï¿½ï¿½ï¿½Åºï¿½Í¬ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½
 reg [7:0]data_r2;
-reg [16:0]wr_addr_temp = 17'd0;
-//----------------ÄÚ²¿¼Ä´æÆ÷----------------
-reg trigger = 0; //´¥·¢±êÖ¾
-reg wren_temp = 0; //Ð´ RAM
-reg act_r = 0; //¿ªÊ¼²É¼¯
-reg [7:0]trigger_dat; //´¥·¢Ìõ¼þ±È½ÏÊý¾Ý
-//----------------ÄÚ²¿Á¬Ïß----------------
-wire [7:0] s_posedge; //ÉÏÉýÑØ±êÖ¾
-wire [7:0] s_negedge; //ÏÂ½µÑØ±êÖ¾
-wire [7:0] s_edge; //±ßÑØ±êÖ¾
-assign wr_data = data_r2; //²É¼¯Êý¾ÝÊä³öÖÁ RAM
+reg [14:0]wr_addr_temp;/*synthesis PAP_MARK_DEBUG="1"*/
+reg [10:0]wr_addr_cons_temp;/*synthesis PAP_MARK_DEBUG="1"*/
+//----------------ï¿½Ú²ï¿½ï¿½Ä´ï¿½ï¿½ï¿½----------------
+reg trigger = 0; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾
+reg wren_temp = 0; /*synthesis PAP_MARK_DEBUG="1"*/
+reg act_r = 0; //ï¿½ï¿½Ê¼ï¿½É¼ï¿½
+reg [7:0]trigger_dat; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È½ï¿½ï¿½ï¿½ï¿½ï¿½
+//----------------ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½----------------
+wire [7:0] s_posedge; //ï¿½ï¿½ï¿½ï¿½ï¿½Ø±ï¿½Ö¾
+wire [7:0] s_negedge; //ï¿½Â½ï¿½ï¿½Ø±ï¿½Ö¾
+wire [7:0] s_edge; //ï¿½ï¿½ï¿½Ø±ï¿½Ö¾
+assign wr_data = data_r2; //ï¿½É¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ RAM
 assign wren=wren_temp;
 assign wr_addr=wr_addr_temp;
-
-
-//----------------Í¬²½ÊäÈëÐÅºÅ----------------
-always@(posedge clk_50M)
-    if(clk_sample) begin
-        data_r1<=data_in;//Ò»¼¶¼Ä´æÆ÷¸³Öµ
-        data_r2<=data_r1;//¶þ¼¶¼Ä´æÆ÷¸³Öµ
+assign wr_addr_cons = wr_addr_cons_temp;
+//----------------Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Åºï¿½----------------
+always@(posedge clk_50M) begin
+    if(clken) begin
+        data_r1<=data_in;//Ò»ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
+        data_r2<=data_r1;//ï¿½ï¿½ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
     end
-assign s_posedge=data_r1&~data_r2;//ÉÏÉýÑØ¼ì²â
-assign s_negedge=~data_r1&data_r2;//ÏÂ½µÑØ¼ì²â
-assign s_edge=data_r1^data_r2; //±ßÑØ¼ì²â
-//----------------¸ù¾Ý²»Í¬µÄ´¥·¢Ä£Ê½Ñ¡Ôñ´¥·¢Êý¾Ý£¨trigger_dat£© ------
+end
+assign s_posedge=data_r1&~data_r2;//ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½
+assign s_negedge=~data_r1&data_r2;//ï¿½Â½ï¿½ï¿½Ø¼ï¿½ï¿½
+assign s_edge=data_r1^data_r2; //ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½
+//----------------ï¿½ï¿½ï¿½Ý²ï¿½Í¬ï¿½Ä´ï¿½ï¿½ï¿½Ä£Ê½Ñ¡ï¿½ñ´¥·ï¿½ï¿½ï¿½ï¿½Ý£ï¿½trigger_datï¿½ï¿½ ------
 
 always@(mode_sel or s_posedge or s_negedge or s_edge or data_r2)
     begin
         case(mode_sel)
-            3'd0:trigger_dat=~data_r2; //µÍµçÆ½´¥·¢
-            3'd1:trigger_dat=data_r2; //¸ßµçÆ½´¥·¢
-            3'd2:trigger_dat=s_posedge; //ÉÏÉýÑØ´¥·¢
-            3'd3:trigger_dat=s_negedge; //ÏÂ½µÑØ´¥·¢
-            3'd4:trigger_dat=s_edge; //±ßÑØ´¥·¢
-            3'd5:trigger_dat=10'h3ff; //±ßÑØ´¥·¢
+            3'd0:trigger_dat=~data_r2; //ï¿½Íµï¿½Æ½ï¿½ï¿½ï¿½ï¿½
+            3'd1:trigger_dat=data_r2; //ï¿½ßµï¿½Æ½ï¿½ï¿½ï¿½ï¿½
+            3'd2:trigger_dat=s_posedge; //ï¿½ï¿½ï¿½ï¿½ï¿½Ø´ï¿½ï¿½ï¿½
+            3'd3:trigger_dat=s_negedge; //ï¿½Â½ï¿½ï¿½Ø´ï¿½ï¿½ï¿½
+            3'd4:trigger_dat=s_edge; //ï¿½ï¿½ï¿½Ø´ï¿½ï¿½ï¿½
+            3'd5:trigger_dat=10'h3ff; //ï¿½ï¿½ï¿½Ø´ï¿½ï¿½ï¿½
         default:trigger_dat=10'h3ff;
     endcase
 end
-//----------------¼ì²âÊÇ·ñÂú×ã´¥·¢Ìõ¼þ----------------
+//----------------ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ã´¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½----------------
 
 always@(posedge clk_50M) begin
-    if(trigger_dat[channel_sel]&&clk_sample) begin
+    if(trigger_dat[channel_sel]&&clken) begin
         trigger<=1;
     end
     else begin
         trigger<=0;
     end
 end
-//----------------±£³Öµ¥´Î´¥·¢×´Ì¬£¬Ö±µ½Êý¾ÝÍê±Ï----------------
+
+reg full_flag = 1'd0;/*synthesis PAP_MARK_DEBUG="1"*/
+parameter waitime = 24'd2_499_999;
 always@(posedge clk_50M) begin
-    if(act)
-        act_r <= 1'b1;
-    else if(wr_addr_temp == 17'd131071)
-        act_r <= 1'b0;
-    else
-        act_r <= act_r;
+    if(cnt_loa != 2'd1) begin
+        if(act && (wr_addr_temp == 15'd32767)) begin
+            full_flag <= 1'b1;
+        end
+        else begin
+            full_flag <= 1'b0;
+        end
+    end
+    else if(cnt_loa == 2'd1) begin
+        if(wait_cnt == waitime) begin
+            full_flag <= 1'd0;
+        end
+        else if(wr_addr_cons_temp == 11'd1919) begin
+            full_flag <= 1'd1;
+        end
+        else begin
+            full_flag <= full_flag;
+        end
+    end
 end
-//----------------²úÉúÐ´ RAM µØÖ·----------------
-always@(posedge clk_sample) begin
-    if(wren_temp) begin
-        if(wr_addr_temp != 17'd131071) begin
-            wr_addr_temp <= wr_addr_temp + 1'b1;
+
+
+reg [23:0] wait_cnt;/*synthesis PAP_MARK_DEBUG="1"*/
+always@(posedge clk_50M) begin
+    if(cnt_loa == 2'd1) begin
+        if(full_flag) begin
+            wait_cnt <= wait_cnt +1'd1;
+        end
+        else begin
+            wait_cnt <= 24'd0;
+        end
+    end
+    else begin
+        wait_cnt <= 24'd0;
+    end
+end
+
+always@(posedge clk_50M) begin
+    if(cnt_loa != 2'd1) begin
+        if(clken && wren_temp) begin
+            wr_addr_temp <= wr_addr_temp + 1'd1;
+        end
+        else if(~wren_temp) begin
+            if(full_flag) begin
+                wr_addr_temp <= wr_addr_temp;
+            end
+            else begin
+                wr_addr_temp <= 15'd0;
+            end
         end
         else begin
             wr_addr_temp <= wr_addr_temp;
         end
     end
-    else if(act) begin
-        wr_addr_temp <= wr_addr_temp;
+    else if(cnt_loa == 2'd1) begin
+        wr_addr_temp <= 15'd0;
+    end
+end
+
+always@(posedge clk_50M) begin
+    if(cnt_loa != 2'd1) begin
+        wr_addr_cons_temp <= 11'd0;
+    end
+    else if(cnt_loa == 2'd1) begin
+        if(!full_flag) begin
+            if(clken && wren_temp) begin
+                if(wr_addr_cons_temp == 11'd1919) begin
+                    wr_addr_cons_temp <= 11'd0;
+                end
+                else begin
+                    wr_addr_cons_temp <= wr_addr_cons_temp + 1'd1;
+                end
+            end
+            else begin
+                wr_addr_cons_temp <= wr_addr_cons_temp;
+            end
+        end
+        else begin
+            wr_addr_cons_temp <= 11'd0;
+        end
     end
     else begin
-        wr_addr_temp <= 17'd0;
+        wr_addr_cons_temp <= 11'd0;
     end
 end
 
 
-reg flag;
+
+//----------------ï¿½ï¿½ï¿½Ð´ RAM ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½----------------
 always@(posedge clk_50M) begin
-    if(!rst_n) begin
-        flag <= 1'b0;
+    if(cnt_loa != 2'd1) begin
+        if(wr_addr_temp == 15'd32767)
+            wren_temp <= 1'b0;
+        else if(act && trigger)
+            wren_temp <= 1'b1;
+        else if(!act) begin
+            wren_temp <= 1'd0;
+        end
+        else begin
+            wren_temp <= wren_temp;
+        end
     end
-    else if (wr_addr_temp == 17'd131071) begin
-        flag <= 1'b1;
+    else if(cnt_loa == 2'd1) begin
+        if(act && trigger) begin
+            wren_temp <= 1'd1;
+        end
+        else if(!act) begin
+            wren_temp <= 1'd0;
+        end
+        else begin
+            wren_temp <= wren_temp;
+        end
     end
-    else begin
-        flag <= flag;    
-    end
-end
-//----------------¼ì²éÐ´ RAM Ìõ¼þÊÇ·ñÂú×ã----------------
-always@(posedge clk_50M) begin
-    if(wr_addr_temp == 17'd131071)
-        wren_temp <= 1'b0;
-    else if(act && trigger)
-        wren_temp <= 1'b1;
-    else 
-        wren_temp <= wren_temp;
 end
 endmodule
 

@@ -10,10 +10,10 @@ module sig_gen(
     output da_clk
     
 );
-    assign da_clk = clk;
+    assign da_clk = clk_50M;
 
     reg [1:0] amp;
-    always@(posedge clk) begin
+    always@(posedge clk_50M) begin
         if(!rst_n) begin
             amp <= 3'd1;
         end
@@ -36,7 +36,7 @@ module sig_gen(
     end
     
     reg [5:0] fre_word;
-    always @(posedge clk) begin
+    always @(posedge clk_50M) begin
         if(!rst_n) begin
             fre_word <= 6'd40;
         end
@@ -59,7 +59,7 @@ module sig_gen(
     end
 
     reg [8:0] numOFsample;
-    always @(posedge clk) begin
+    always @(posedge clk_50M) begin
         if(!rst_n) begin
             numOFsample <= 9'd50;
         end
@@ -82,7 +82,7 @@ module sig_gen(
     end
 
     reg [10:0] pha_word;
-    always @(posedge clk) begin
+    always @(posedge clk_50M) begin
         if(!rst_n) begin
             pha_word <= 11'd0;
         end
@@ -105,7 +105,7 @@ module sig_gen(
     end
 
     reg [8:0] duty;
-    always @(posedge clk) begin
+    always @(posedge clk_50M) begin
         if(!rst_n) begin
             duty <= numOFsample * 5'd30 / 7'd100;
         end
@@ -128,7 +128,7 @@ module sig_gen(
     end
 
     reg[8:0] s3_data_cnt;
-    always @(posedge clk) begin
+    always @(posedge clk_50M) begin
         if(!rst_n) begin
             s3_data_cnt <= 9'd0;
         end
@@ -146,7 +146,7 @@ module sig_gen(
     end
 
     reg [7:0] squ_data;
-    always @(posedge clk) begin
+    always @(posedge clk_50M) begin
         if(!rst_n) begin
             squ_data <= 8'd0;
         end
@@ -164,7 +164,7 @@ module sig_gen(
     end
 
     reg [11:0] sin_addr_temp;
-    always @(posedge clk) begin
+    always @(posedge clk_50M) begin
         if(!rst_n) begin
             sin_addr_temp <= 12'd0;
         end
@@ -182,13 +182,13 @@ module sig_gen(
     wire [7:0] sin_data;
     sin_gen u_sin_gen(
         .addr(sin_addr[10:0]),          // input [9:0]
-        .clk(clk),            // input
+        .clk(clk_50M),            // input
         .rst(!confirm),            // input
         .rd_data(sin_data)     // output [7:0]
     );
 
     reg [10:0] s2_addr_temp;
-    always @(posedge clk) begin
+    always @(posedge clk_50M) begin
         if(!rst_n) begin
             s2_addr_temp <= 11'd0;
         end
@@ -206,7 +206,7 @@ module sig_gen(
     wire [7:0] tri_data;
     tri_gen u_tri_gen(
         .addr(s2_addr),
-        .clk(clk),
+        .clk(clk_50M),
         .rst(!confirm),
         .rd_data(tri_data)
     );
@@ -214,64 +214,10 @@ module sig_gen(
     wire [7:0] saw_data;
     saw_gen u_saw_gen(
         .addr(s2_addr),
-        .clk(clk),
+        .clk(clk_50M),
         .rst(!confirm),
         .rd_data(saw_data)
     );
-
-
-    // reg [8:0] tri_data_cnt;
-    // reg seq_flag;
-    // always @(posedge clk) begin
-    //     if(!rst_n) begin
-    //         tri_data_cnt <= 9'd0;
-    //         seq_flag <= 1'b0;
-    //     end
-    //     else if((cnt_sig == 2'd2) && confirm) begin
-    //         if((tri_data_cnt == 9'd1) && seq_flag) begin
-    //             tri_data_cnt <= tri_data_cnt - 1'd1;
-    //             seq_flag <= 1'b0;
-    //         end
-    //         else if((tri_data_cnt == (numOFsample / 2)) && !seq_flag) begin
-    //             tri_data_cnt <= tri_data_cnt - 1'd1;
-    //             seq_flag <= 1'b1;
-    //         end
-    //         else begin
-    //             tri_data_cnt <= seq_flag ? tri_data_cnt - 1'd1 : tri_data_cnt + 1'd1;
-    //             seq_flag <= seq_flag;
-    //         end
-    //     end
-    //     else begin
-    //         tri_data_cnt <= 9'd0;
-    //         seq_flag <= 1'b0;
-    //     end
-    // end
-
-    // reg [7:0] tri_data;
-    // always @(posedge clk) begin
-    //     if(!rst_n) begin
-    //         tri_data <= 8'd0;
-    //     end
-    //     else if((cnt_sig == 2'd2) && confirm) begin
-    //         tri_data <= tri_data_cnt * (8'd255 >> amp) / (numOFsample / 2);
-    //     end
-    //     else begin
-    //         tri_data <= 8'd0;
-    //     end
-    // end
-
-    // reg [7:0] saw_data;
-    // always @(posedge clk) begin
-    //     if(!rst_n) begin
-    //         saw_data <= 8'd0;
-    //     end
-    //     else if((cnt_sig == 2'd3) && confirm) begin
-    //         saw_data <= s3_data_cnt * (8'd255 >> amp) / (numOFsample - 1);
-    //     end
-    //     else begin
-    //         saw_data <= 8'd0;
-    //     end
-    // end
 
     assign data_out = {8{cnt_sig == 2'd0}} & (sin_data >> amp)
                     | {8{cnt_sig == 2'd1}} & squ_data

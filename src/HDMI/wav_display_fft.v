@@ -9,7 +9,6 @@ module wav_display_fft(
 	input                       i_de,	
 	input[23:0]                 i_data,  
     input                   fft_data_valid,
-    //input                       fft_confirm,
     
     
 	output                      o_hs/* synthesis PAP_MARK_DEBUG="true" */,    
@@ -32,14 +31,14 @@ parameter S_DONE = 4'b0100 ;
 parameter S_CAL = 4'b1000;
 
 
-wire [31:0] re_sq;  // Êµï¿½ï¿½Æ½ï¿½ï¿½
-wire [31:0] im_sq;  // ï¿½é²¿Æ½ï¿½ï¿½
-wire [31:0] quadratic_sum;    // Êµï¿½ï¿½Æ½ï¿½ï¿½ + ï¿½é²¿Æ½ï¿½ï¿½
+wire [31:0] re_sq;  // Êµ²¿Æ½·½
+wire [31:0] im_sq;  // Ðé²¿Æ½·½
+wire [31:0] quadratic_sum;    // Êµ²¿Æ½·½ + Ðé²¿Æ½·½
 wire [31:0] amp;
 
-assign re_sq = fft_data_in[31:16] * fft_data_in[31:16];// ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½ï¿½é²¿Æ½ï¿½ï¿½
+assign re_sq = fft_data_in[31:16] * fft_data_in[31:16];// ¼ÆËãÊµ²¿Æ½·½ºÍÐé²¿Æ½·½
 assign im_sq = fft_data_in[15:0] * fft_data_in[15:0];
-assign quadratic_sum = re_sq + im_sq;// ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½
+assign quadratic_sum = re_sq + im_sq;// ¼ÆËãÆ½·½ºÍ
 
 
 wire[11:0] pos_x;
@@ -74,30 +73,35 @@ end
 
 always@(posedge pclk)
 begin
-	if(region_active == 1'b1 && pos_de == 1'b1 && rdaddress < 8'd255)
-		rdaddress <= rdaddress + 8'd1;
-	else
-		rdaddress <= 8'd0;
+    if(!rst_n)
+        rdaddress <= 8'd0;
+    else
+    begin
+	    if(region_active && pos_de && rdaddress < 8'd255)
+		    rdaddress <= rdaddress + 8'd1;
+	    else
+		    rdaddress <= 8'd0;
+    end
 end
 
 //mapping amp--->amp_8bit
-wire [31:0] q_max = 32'd52618000;//32'd92681000; // ï¿½è¶¨ï¿½ï¿½ï¿½Ýµï¿½ï¿½ï¿½ï¿½Öµ
+wire [31:0] q_max = 32'd22618;//32'd92681000; // Éè¶¨Êý¾ÝµÄ×î´óÖµ
 wire [31:0] q_tmp;
 
 assign q_tmp = q * 8'd255;
-//assign amp_8bit = amp_tmp / amp_max ; // ï¿½ï¿½ï¿½Åµï¿½0-255ï¿½ï¿½Î§ï¿½ï¿½8Î»ï¿½ï¿½
+//assign amp_8bit = amp_tmp / amp_max ; // Ëõ·Åµ½0-255·¶Î§£¨8Î»£©
 
 //mapping wr_addr--->pos_x
 wire [7:0] rd_addr_max = 8'd255;
 
 
 wire [18:0] rd_addr_tmp;
-assign rd_addr_tmp = 12'd1080 * rdaddress;//ï¿½ï¿½Ö¹ï¿½Ë·ï¿½ï¿½ï¿½ï¿½
+assign rd_addr_tmp = 12'd1080 * rdaddress;//·ÀÖ¹³Ë·¨Òç³ö
 always@(posedge pclk)
 begin
         if(region_active == 1'b1)
 		    if(((12'd980- pos_y)/3 <= q_tmp / q_max) &&  (((pos_x-12'd442) == rd_addr_tmp / rd_addr_max) || 
-                ((pos_x-12'd441) == rd_addr_tmp / rd_addr_max)|| ((pos_x-12'd440) == rd_addr_tmp / rd_addr_max) ))//ï¿½Ó·ï¿½ÖµÓ³ï¿½ï¿½ãµ½xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                ((pos_x-12'd441) == rd_addr_tmp / rd_addr_max)|| ((pos_x-12'd440) == rd_addr_tmp / rd_addr_max) ))//´Ó·ùÖµÓ³Éäµãµ½xÖáµÄÊúÏß
             //if((12'd980- pos_y)/3 <= amp_tmp / amp_max) 
 			    v_data <= wave_color;
 		    else
@@ -164,8 +168,8 @@ end*/
                     state <= IDLE;
                 end
             S_CAL: begin
-                if (cal_done) begin // ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-                    state <= S_SAMPLE; // ×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
+                if (cal_done) begin // Èç¹û·ùÖµ¼ÆËãÍê³É
+                    state <= S_SAMPLE; // ×ªµ½²ÉÑù×´Ì¬
                 end
             end
             S_SAMPLE: begin
@@ -175,7 +179,7 @@ end*/
                     state <= S_DONE;
                 end else begin
                     sample_cnt <= sample_cnt + 9'd1;
-                    wren <= 1'b1; // ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½
+                    wren <= 1'b1; // ½øÐÐÐ´Èë
                 end
             end
             S_DONE : begin
@@ -245,7 +249,7 @@ assign wr_addr = sample_cnt[7:0] ;
 // end
 
 fft_ram ram_fft (
-  .wr_data(fft_data_in),    // input [31:0]
+  .wr_data(amp),    // input [31:0]
   .wr_addr(wr_addr),    // input [7:0]
   .wr_en(wren),        // input
   .wr_clk(fft_clk),      // input
@@ -274,13 +278,14 @@ timing_gen_xy timing_gen_xy_m0(
 
 //amp calculation
 sqrt_calculator #(
-        .DATA_WIDTH(32),           // ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½ï¿½Îª32Î»
-        .ITERATIONS(20)            // Å£ï¿½Ùµï¿½ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½Îª20ï¿½ï¿½
+        .DATA_WIDTH(32),           // Êý¾Ý¿í¶ÈÎª32Î»
+        .ITERATIONS(20)            // Å£¶Ùµü´úµÄ´ÎÊýÎª20´Î
     ) sqrt_inst (
-        .clk(fft_clk),                 // ï¿½ï¿½ï¿½Ó¶ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Åºï¿½
-        .radicand(quadratic_sum),      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½
-        .sqrt_out(amp),     // ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-        .rstn(rstn),
+        .clk(fft_clk),                 // Á¬½Ó¶¥²ãÄ£¿éµÄÊ±ÖÓÐÅºÅ
+        .radicand(quadratic_sum),      // ÊäÈë´ý¿ªÆ½·½Êý
+        .sqrt_out(amp),     // Êä³öÆ½·½¸ù½á¹û
+        .rstn(rst_n),
         .cal_done(cal_done)
     );
+
 endmodule

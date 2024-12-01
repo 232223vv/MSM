@@ -1,18 +1,22 @@
 module Logic_analyzer_dis(
     input                     rst_n,
     input                      pclk, //148.5MHZ 
+    input                   clk_50M,
     input                      i_hs,
     input                      i_vs,
     input                      i_de,
     input        [23:0] rgb_data_in, //background chart's rgbdata
     input        [11:0]      marker, //vertical line marker
-    input        [7:0]      rd_data, //8 bits each channel's data
+    input        [7:0]rd_data_store,/*synthesis PAP_MARK_DEBUG="1"*/ //static and uart
+    input        [7:0] rd_data_cons,/*synthesis PAP_MARK_DEBUG="1"*///dynamic
     input                  mov_left,
     input                 mov_right,
-    input                      stop,
+    input        [1:0]      cnt_loa,
 
-    output                  rd_clk, 
-    output       [16:0]      rd_addr_w, 
+
+    output                    rd_clk, 
+    output       [14:0]      rd_addr,//static and uart
+    output       [10:0] rd_addr_cons,//dynamic
     output                      o_hs,    
 	output                      o_vs,    
 	output                      o_de,
@@ -24,16 +28,15 @@ module Logic_analyzer_dis(
 assign o_hs = pos_hs;
 assign o_vs = pos_vs;
 assign o_de = pos_de;
-assign rd_clk = (pos_x-10'd450)%80==1 ? 1'b1 : 1'b0;
+assign rd_clk = pclk;
+
 
 //-------------regs----------------
 reg [23:0] disp_data_r;
 reg region_active;
 reg [3:0] cnt_stop = 4'd0;
 reg [7:0] rd_data_r;
-reg [16:0] rd_addr = 17'd0;
-reg [16:0] addr_offset = 0;
-reg [17:0] rd_addr_w_temp;
+reg [14:0] addr_offset = 0;
 
 //------------wires------------
 wire grid;
@@ -49,6 +52,7 @@ wire       pos_de;
 wire [23:0] pos_data;
 wire [7:0] edges;
 wire edge_clk;
+wire [7:0] rd_data;/*synthesis PAP_MARK_DEBUG="1"*/
 
 
 //------------color parameters---------------
@@ -77,71 +81,34 @@ CH7_H=12'd940, CH7_L=12'd1036;
 
 //offset setting
 always@(posedge pclk) begin
-    if(stop) begin
+    if(cnt_loa != 2'b01)
+        begin
         if(mov_left) begin
-            if(addr_offset == 17'd0) begin     
-                addr_offset <= 17'd131057;
-            end
-            else begin
-                addr_offset <= addr_offset - 17'd18;
-            end
+            if(addr_offset == 15'd0)    
+                addr_offset <= 15'd32767;
+            else
+                addr_offset <= addr_offset - 15'd360;
         end
         else if(mov_right) begin
-            if(addr_offset == 17'd131057) begin
-                addr_offset <= 17'd0;
-            end
-            else begin
-                addr_offset <= addr_offset + 17'd18;
-            end
+            if(addr_offset == 15'd32767) 
+                addr_offset <= 15'd0;
+            else 
+                addr_offset <= addr_offset + 15'd360;
         end
-        else begin
-            addr_offset <= addr_offset;
-        end    
-    end
-    else begin
-        addr_offset <= 17'd0;
-    end
+        else 
+            addr_offset <= addr_offset;  
+        end
+    else
+        addr_offset <= 0;  
 end
 
-always@(posedge rd_clk) begin
-    rd_addr_w_temp <= rd_addr + addr_offset;
-end
+//rd_addr setting
+assign rd_addr = pos_x + addr_offset + 1'b1;
+//assign rd_addr_cons = region_active ? pos_x - 10'd450 : 0;
+assign rd_addr_cons = pos_x;
 
-//rd_addr changing
-always @(posedge rd_clk)
-begin
-    if(rd_addr == 17'h1ffff)
-        rd_addr <= 17'd0;
-    else 
-    begin
-        if(stop)
-        begin
-                if(cnt_stop == 4'd17)
-                begin
-                    cnt_stop <= 4'd0;
-                    rd_addr <= rd_addr + 1'd1;
-                end
-                else if(cnt_stop == 4'd0)
-                begin
-                    cnt_stop <= cnt_stop + 4'd1;
-                    rd_addr <= rd_addr - 4'd17;
-                end
-                else
-                begin
-                    cnt_stop <= cnt_stop + 4'd1;
-                    rd_addr <= rd_addr + 1'd1;
-                end
-        end
-        else
-        begin
-            cnt_stop <= 4'd0;
-            rd_addr <= rd_addr + 1'd1;
-        end
-    end      
-end
-
-assign rd_addr_w = (rd_addr_w_temp >= 17'd131071) ? rd_addr_w_temp - 17'd131071 : rd_addr_w_temp;
-
+//rd_data choosing
+assign rd_data = (cnt_loa==2'b01) ? rd_data_cons : rd_data_store;
 
 //------------------mark x position------------------
 assign mark=( (pos_x-10'd450==marker)||(pos_x-10'd449==marker)||(pos_x-10'd448==marker) )&&(pos_y[1:0]!=2'd1)&&region_active;
@@ -255,8 +222,8 @@ timing_gen_xy timing_gen_xy_m0(
 	.y        (pos_y    )
 );
 
-la_pll pll_la (
-  .clkin1(pclk),        // input
+loa_pll pll_loa (
+  .clkin1(clk_50M),        // input
   .pll_lock(pll_lock),    // output
   .clkout0(edge_clk)       // output
 );

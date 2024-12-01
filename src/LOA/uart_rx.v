@@ -1,7 +1,8 @@
+`timescale 1ns / 1ps
 `define UD #1
 
 module uart_rx # (
-    parameter            BPS_NUM     =    16'd434
+    parameter            BPS_NUM     =    16'd5208
 //  设置波特率为4800时，  bit位宽时钟周期个数:50MHz set 10417  40MHz set 8333
 //  设置波特率为9600时，  bit位宽时钟周期个数:50MHz set 5208   40MHz set 4167
 //  设置波特率为115200时，bit位宽时钟周期个数:50MHz set 434    40MHz set 347
@@ -10,12 +11,17 @@ module uart_rx # (
       //input ports
       input             clk,
       input             uart_rx,
-    
+      input rst_n,
+      input en,
       //output ports
-      output reg [7:0]  rx_data,
-      output reg        rx_en,
-      output            rx_finish
+      output reg [7:0]  rx_data,/*synthesis PAP_MARK_DEBUG="1"*/
+      output reg        rx_en, /*synthesis PAP_MARK_DEBUG="1"*/
+      output            rx_finish,
+      output [14:0]     wr_addr,/*synthesis PAP_MARK_DEBUG="1"*/
+      output            wr_en
 );
+
+
 
     // uart rx state machine's state
     localparam  IDLE         = 4'h0;    //空闲状态，等待开始信号到来.
@@ -34,12 +40,13 @@ module uart_rx # (
     reg                 uart_rx_2d;       //save uart_rx one cycle.保存uart_rx 前两个时钟周期
     wire                start;            //active when start a byte receive.  检测到start信号标志
     reg    [15:0]       clk_div_cnt;      //count for division the clock.      波特周期计数器
-
+    reg                 wr_en_temp=0;
     //==========================================================================
     //logic
     //==========================================================================
     
     //some control single.
+    
     always @ (posedge clk) 
     begin
          uart_rx_1d <= `UD uart_rx;
@@ -51,6 +58,122 @@ module uart_rx # (
 
 
     //division the clock to satisfy baud rate.波特周期计数器
+    
+   
+    
+    parameter changeTime = 11'd1000;
+    reg [5:0] numofchange; 
+    reg [10:0] cntwait;
+    reg writetime;
+    always@(posedge clk) begin
+        if(rx_finish) begin
+            writetime <= 1'd1;
+        end
+        else if(numofchange == 6'd40) begin
+            writetime <= 1'd0;
+        end
+        else begin
+            writetime <= writetime;
+        end
+    end
+    
+    always@(posedge clk) begin
+        if(writetime)begin
+            if(cntwait == changeTime) begin
+                cntwait <= 11'd0;
+            end
+            else begin
+                cntwait <= cntwait + 1'd1;
+            end
+        end
+        else begin
+            cntwait <= 11'd0;
+        end
+    end
+    
+    always@(posedge clk) begin
+        if(writetime) begin
+            if(cntwait == changeTime) begin
+                if(numofchange == 6'd40) begin
+                    numofchange <= 6'd0;
+                end
+                else begin 
+                    numofchange <= numofchange + 1'd1;
+                end
+            end
+            else begin
+                numofchange <= numofchange;
+            end
+        end
+        else begin
+            numofchange <= 6'd0;
+        end
+    end
+    
+     always @(posedge clk) begin
+        if(rx_finish) begin
+            wr_en_temp <= 1'd1;
+        end
+        else if(numofchange == 6'd40) begin
+            wr_en_temp <= 1'd0;
+        end
+        else begin
+            wr_en_temp <= wr_en_temp;
+        end  
+    end
+    
+//    reg [14:0] wr_addr_temp=0;
+//    always @(posedge clk) begin
+//        if(!rst_n) begin
+//            wr_addr_temp<=15'b0;
+//        end
+//        else if(rx_finish) begin
+//            if(wr_addr_temp<=32767) begin
+//                wr_addr_temp<=wr_addr_temp+1;
+//            end
+//            else begin
+//                wr_addr_temp<=15'd0;
+//            end
+//        end
+//        else begin
+//            wr_addr_temp<=wr_addr_temp;
+//        end
+//    end
+
+    reg [14:0] wr_addr_temp=15'd0;
+    always@(posedge clk) begin
+        if(writetime) begin
+            if(cntwait == changeTime) begin
+                if(wr_addr_temp == 15'd32767) begin
+                    wr_addr_temp <= wr_addr_temp;
+                end
+                else begin
+                    wr_addr_temp <= wr_addr_temp + 1'd1;
+                end
+            end
+            else begin
+                wr_addr_temp <= wr_addr_temp;
+            end
+        end
+        else begin
+            wr_addr_temp <= wr_addr_temp;
+        end
+    end
+    reg [14:0] wr_addr_temp_1;
+    reg [14:0] wr_addr_temp_2;
+     always @(posedge clk) begin
+        if(!rst_n) begin
+            wr_addr_temp_1<=15'b0;
+            wr_addr_temp_2<=15'b0;
+        end
+       
+        else begin
+            wr_addr_temp_1<=wr_addr_temp;
+            wr_addr_temp_2<=wr_addr_temp_1;
+        end
+    end
+    assign wr_addr=wr_addr_temp_2;
+            
     always @ (posedge clk)
     begin
         if(rx_state == IDLE || clk_div_cnt == BPS_NUM)
@@ -58,10 +181,7 @@ module uart_rx # (
         else
             clk_div_cnt   <= `UD clk_div_cnt + 16'h1;
     end
-    
-    // receive bit data numbers 
-    //在接收数据状态中，接收的bit位计数，每一个波特周期计数加1
-    reg    [2:0]      rx_bit_cnt=0;    //the bits number has transmited.
+    reg    [2:0]      rx_bit_cnt=0;
     always @ (posedge clk)
     begin
         if(rx_state == IDLE)
@@ -89,7 +209,7 @@ module uart_rx # (
       case(rx_state)
           IDLE       :  
           begin
-              if(start)                                     //监测到start信号到来，下一状态跳转到start状态
+              if(start&& en)                                     //监测到start信号到来，下一状态跳转到start状态
                   rx_state_n = RECEIV_START;
               else
                   rx_state_n = rx_state;
