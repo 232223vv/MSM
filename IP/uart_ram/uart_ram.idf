@@ -6,7 +6,7 @@
         <display_name>DRM Based Simple Dual Port RAM</display_name>
         <name>Logos DRM Based Simple Dual Port RAM</name>
         <version>1.6</version>
-        <instance>ram1024x8</instance>
+        <instance>uart_ram</instance>
         <family>Logos</family>
         <device>PGL50H</device>
         <package>FBG484</package>
@@ -15,51 +15,35 @@
     </header>
     <param_list>
         <param>
-            <name>INIT_FILE</name>
-            <value>NONE</value>
-        </param>
-        <param>
-            <name>RD_OCE_EN</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>WR_ADDR_STROBE_EN</name>
-            <value>false</value>
+            <name>SAMEWIDTH_EN</name>
+            <value>true</value>
         </param>
         <param>
             <name>DRM_MODE_SEL</name>
-            <value>DRM18K</value>
+            <value>AUTO</value>
         </param>
         <param>
-            <name>MODE_18K</name>
-            <value>true</value>
+            <name>RD_BE_WIDTH</name>
+            <value>1</value>
+        </param>
+        <param>
+            <name>WR_BYTE_EN</name>
+            <value>false</value>
         </param>
         <param>
             <name>RD_CLK_OR_POL_INV</name>
             <value>false</value>
         </param>
         <param>
-            <name>INIT_EN</name>
-            <value>false</value>
+            <name>RESET_TYPE</name>
+            <value>ASYNC</value>
         </param>
         <param>
-            <name>INIT_FORMAT</name>
-            <value>BIN</value>
+            <name>RD_CLK_EN</name>
+            <value>false</value>
         </param>
         <param>
             <name>POWER_OPT</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>RD_ADDR_WIDTH</name>
-            <value>11</value>
-        </param>
-        <param>
-            <name>MODE_9K</name>
-            <value>false</value>
-        </param>
-        <param>
-            <name>RD_ADDR_STROBE_EN</name>
             <value>false</value>
         </param>
         <param>
@@ -67,7 +51,23 @@
             <value>1</value>
         </param>
         <param>
-            <name>WR_CLK_EN</name>
+            <name>WR_ADDR_WIDTH</name>
+            <value>15</value>
+        </param>
+        <param>
+            <name>WR_ADDR_STROBE_EN</name>
+            <value>false</value>
+        </param>
+        <param>
+            <name>INIT_FILE</name>
+            <value>NONE</value>
+        </param>
+        <param>
+            <name>RD_DATA_WIDTH</name>
+            <value>8</value>
+        </param>
+        <param>
+            <name>INIT_EN</name>
             <value>false</value>
         </param>
         <param>
@@ -75,23 +75,19 @@
             <value>8</value>
         </param>
         <param>
-            <name>SAMEWIDTH_EN</name>
-            <value>true</value>
+            <name>RD_ADDR_WIDTH</name>
+            <value>15</value>
         </param>
         <param>
-            <name>RD_DATA_WIDTH</name>
-            <value>8</value>
-        </param>
-        <param>
-            <name>WR_BYTE_EN</name>
+            <name>WR_CLK_EN</name>
             <value>false</value>
         </param>
         <param>
-            <name>RD_BE_WIDTH</name>
-            <value>1</value>
+            <name>OUTPUT_REG</name>
+            <value>false</value>
         </param>
         <param>
-            <name>RD_CLK_EN</name>
+            <name>RD_OCE_EN</name>
             <value>false</value>
         </param>
         <param>
@@ -99,16 +95,20 @@
             <value>8</value>
         </param>
         <param>
-            <name>OUTPUT_REG</name>
+            <name>MODE_18K</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>RD_ADDR_STROBE_EN</name>
             <value>false</value>
         </param>
         <param>
-            <name>WR_ADDR_WIDTH</name>
-            <value>11</value>
+            <name>MODE_9K</name>
+            <value>false</value>
         </param>
         <param>
-            <name>RESET_TYPE</name>
-            <value>ASYNC</value>
+            <name>INIT_FORMAT</name>
+            <value>BIN</value>
         </param>
     </param_list>
     <pin_list>
@@ -125,7 +125,7 @@
             <text>wr_addr</text>
             <dir>input</dir>
             <pos>left</pos>
-            <msb>10</msb>
+            <msb>14</msb>
             <lsb>0</lsb>
         </pin>
         <pin>
@@ -151,7 +151,7 @@
             <text>rd_addr</text>
             <dir>input</dir>
             <pos>right</pos>
-            <msb>10</msb>
+            <msb>14</msb>
             <lsb>0</lsb>
         </pin>
         <pin>
@@ -182,13 +182,13 @@
     <file_list>
         <output>
             <file pathname="generate.log" format="log" description="Generate Log"/>
-            <file pathname="ram1024x8_tb.v" format="verilog" description="Compiled File"/>
-            <file pathname="ram1024x8_tmpl.v" format="verilog" description="Instantiation Template"/>
-            <file pathname="ram1024x8_tmpl.vhdl" format="vhdl" description="Instantiation Template"/>
+            <file pathname="uart_ram_tb.v" format="verilog" description="Compiled File"/>
+            <file pathname="uart_ram_tmpl.v" format="verilog" description="Instantiation Template"/>
+            <file pathname="uart_ram_tmpl.vhdl" format="vhdl" description="Instantiation Template"/>
         </output>
         <source>
-            <file pathname="rtl/ipml_sdpram_v1_6_ram1024x8.v"/>
-            <file pathname="ram1024x8.v"/>
+            <file pathname="rtl/ipml_sdpram_v1_6_uart_ram.v"/>
+            <file pathname="uart_ram.v"/>
         </source>
     </file_list>
 </ip_inst>

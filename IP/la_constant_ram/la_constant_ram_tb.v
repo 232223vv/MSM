@@ -12,11 +12,11 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 // Library:
-// Filename:TB ram1024x8_tb.v 
+// Filename:TB la_constant_ram_tb.v 
 //////////////////////////////////////////////////////////////////////////////
 `timescale   1ns / 1ps
 
-module  ram1024x8_tb;
+module  la_constant_ram_tb;
 localparam  T_CLK_PERIOD       = 10 ;       //clock a half perid
 localparam  T_RST_TIME         = 200 ;       //reset time 
 
@@ -302,7 +302,7 @@ GTP_GRS GRS_INST(
     .GRS_N(1'b1)
     ) ;
 
-ram1024x8 U_ram1024x8 (
+la_constant_ram U_la_constant_ram (
     .wr_data        ( tb_wrdata_cnt                 ),
     .wr_addr        ( tb_wr_addr[WR_ADDR_WIDTH-1:0] ),
     .wr_en          ( tb_wr_en                      ),

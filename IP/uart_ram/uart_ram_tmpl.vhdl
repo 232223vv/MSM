@@ -6,14 +6,14 @@
 --   * Change the net names in the port map.
 
 
-COMPONENT ram1024x8
+COMPONENT uart_ram
   PORT (
     wr_data : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
-    wr_addr : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
+    wr_addr : IN STD_LOGIC_VECTOR(14 DOWNTO 0);
     wr_en : IN STD_LOGIC;
     wr_clk : IN STD_LOGIC;
     wr_rst : IN STD_LOGIC;
-    rd_addr : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
+    rd_addr : IN STD_LOGIC_VECTOR(14 DOWNTO 0);
     rd_data : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
     rd_clk : IN STD_LOGIC;
     rd_rst : IN STD_LOGIC
@@ -21,7 +21,7 @@ COMPONENT ram1024x8
 END COMPONENT;
 
 
-the_instance_name : ram1024x8
+the_instance_name : uart_ram
   PORT MAP (
     wr_data => wr_data,
     wr_addr => wr_addr,

@@ -12,10 +12,10 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 // Library:
-// Filename:ram1024x8.v
+// Filename:la_constant_ram.v
 //////////////////////////////////////////////////////////////////////////////
 
-module ram1024x8
+module la_constant_ram
     (
     wr_data        , //input write data
     wr_addr        , //input write address
@@ -136,7 +136,7 @@ assign rd_data         = ((DEVICE_NAME == "PGT30G") && (RD_DATA_WIDTH <= 9)) ? r
 
 
 //ipml_sdpram IP instance
-ipml_sdpram_v1_6_ram1024x8
+ipml_sdpram_v1_6_la_constant_ram
     #(
     .c_SIM_DEVICE           (SIM_DEVICE             ),
     .c_WR_ADDR_WIDTH        (WR_ADDR_WIDTH          ),
@@ -156,7 +156,7 @@ ipml_sdpram_v1_6_ram1024x8
     .c_INIT_FORMAT          (INIT_FORMAT            ),
     .c_WR_BYTE_EN           (WR_BYTE_EN             ),
     .c_BE_WIDTH             (BE_WIDTH               )
-    ) U_ipml_sdpram_ram1024x8
+    ) U_ipml_sdpram_la_constant_ram
     (
     .wr_data                (wr_data_wrap           ),//input write data
     .wr_addr                (wr_addr                ),//input write address

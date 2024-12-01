@@ -6,7 +6,7 @@
 --   * Change the net names in the port map.
 
 
-COMPONENT ram1024x8
+COMPONENT la_constant_ram
   PORT (
     wr_data : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
     wr_addr : IN STD_LOGIC_VECTOR(10 DOWNTO 0);
@@ -21,7 +21,7 @@ COMPONENT ram1024x8
 END COMPONENT;
 
 
-the_instance_name : ram1024x8
+the_instance_name : la_constant_ram
   PORT MAP (
     wr_data => wr_data,
     wr_addr => wr_addr,

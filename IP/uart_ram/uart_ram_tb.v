@@ -12,19 +12,19 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 // Library:
-// Filename:TB ram1024x8_tb.v 
+// Filename:TB uart_ram_tb.v 
 //////////////////////////////////////////////////////////////////////////////
 `timescale   1ns / 1ps
 
-module  ram1024x8_tb;
+module  uart_ram_tb;
 localparam  T_CLK_PERIOD       = 10 ;       //clock a half perid
 localparam  T_RST_TIME         = 200 ;       //reset time 
 
-localparam WR_ADDR_WIDTH = 11 ; // @IPC int 9,20
+localparam WR_ADDR_WIDTH = 15 ; // @IPC int 9,20
 
 localparam WR_DATA_WIDTH = 8 ; // @IPC int 1,1152
 
-localparam RD_ADDR_WIDTH = 11 ; // @IPC int 9,20
+localparam RD_ADDR_WIDTH = 15 ; // @IPC int 9,20
 
 localparam RD_DATA_WIDTH = 8 ; // @IPC int 1,1152
 
@@ -302,7 +302,7 @@ GTP_GRS GRS_INST(
     .GRS_N(1'b1)
     ) ;
 
-ram1024x8 U_ram1024x8 (
+uart_ram U_uart_ram (
     .wr_data        ( tb_wrdata_cnt                 ),
     .wr_addr        ( tb_wr_addr[WR_ADDR_WIDTH-1:0] ),
     .wr_en          ( tb_wr_en                      ),

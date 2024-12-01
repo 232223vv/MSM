@@ -6,7 +6,7 @@
 //   * Change the signal names in the port associations
 
 
-ram1024x8 the_instance_name (
+la_constant_ram the_instance_name (
   .wr_data(wr_data),    // input [7:0]
   .wr_addr(wr_addr),    // input [10:0]
   .wr_en(wr_en),        // input
